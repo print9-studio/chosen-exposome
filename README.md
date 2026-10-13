@@ -4,6 +4,9 @@ Interactive version of the LIFEATBRIDGE EVENTS activation proposal for CHOSEN by
 Public link (GitHub Pages): `https://print9-studio.github.io/chosen-exposome/`
 Also deployed to Cloudflare Workers (behind the account's Access login): `https://chosen-exposome.print9-everything.workers.dev`
 
+## Password
+The slide content is encrypted inside `public/index.html` (PBKDF2 + AES-GCM) and decrypted in the browser after the password is entered. The password is not stored in this repo; to change it, rebuild with `DECK_PASSWORD=... python3 build.py` from the build folder.
+
 ## Controls
 - Arrow keys / space / click right or left edge / swipe: move between slides
 - `F`: fullscreen · `N`: toggle presenter notes (also `?presenter` in the URL)
