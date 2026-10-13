@@ -1,7 +1,8 @@
 # Know Your Exposome — activation deck (web version)
 
 Interactive version of the LIFEATBRIDGE EVENTS activation proposal for CHOSEN by Dermatology.
-Served as static assets on Cloudflare Workers: `https://chosen-exposome.print9-everything.workers.dev`
+Public link (GitHub Pages): `https://print9-studio.github.io/chosen-exposome/`
+Also deployed to Cloudflare Workers (behind the account's Access login): `https://chosen-exposome.print9-everything.workers.dev`
 
 ## Controls
 - Arrow keys / space / click right or left edge / swipe: move between slides
@@ -9,7 +10,9 @@ Served as static assets on Cloudflare Workers: `https://chosen-exposome.print9-e
 - `#12` in the URL jumps to slide 12
 
 ## Deploy
-Push to `main` → GitHub Actions runs `wrangler deploy` with the two repository secrets:
+GitHub Pages: Settings → Pages → Source: GitHub Actions. Every push to `main` publishes `public/`.
+
+Cloudflare: Push to `main` → GitHub Actions runs `wrangler deploy` with the two repository secrets:
 - `CLOUDFLARE_API_TOKEN` (token with "Workers Scripts: Edit")
 - `CLOUDFLARE_ACCOUNT_ID`
 
