@@ -1,0 +1,827 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Know Your Exposome – Activation Deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=DM+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{--maroon:#4A141C;--cream:#F7F0E8;--rose:#C98A8F;--red:#C8102E}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#2B0A0F;overflow:hidden;font-family:'DM Sans',Arial,sans-serif;-webkit-font-smoothing:antialiased}
+#stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+#deck{position:relative;width:1920px;height:1080px;transform-origin:center center;flex:none}
+#deck section{position:absolute;inset:0;width:1920px;height:1080px;overflow:hidden;opacity:0;visibility:hidden;transition:opacity .45s ease;box-sizing:border-box}
+#deck section.active{opacity:1;visibility:visible}
+#deck section h1,#deck section h2,#deck section h3,#deck section p,#deck section ul,#deck section ol{margin:0}
+#deck section ul{padding-left:1.1em}
+#deck section li{margin:.15em 0}
+#deck section img{display:block}
+#deck section table{border-collapse:collapse;width:100%;overflow:hidden}
+#deck section th,#deck section td{padding:.35em .6em;border-bottom:1px solid #E4D6CC;vertical-align:top}
+#deck section tr:last-child td{border-bottom:none}
+#deck section hr{border:none;margin:0}
+#deck section b{font-weight:600}
+
+/* chrome */
+#bar{position:fixed;left:0;right:0;bottom:0;height:4px;background:rgba(237,214,194,.15)}
+#bar i{display:block;height:100%;background:var(--rose);width:0;transition:width .3s}
+#hud{position:fixed;right:16px;bottom:14px;color:var(--rose);font-size:13px;letter-spacing:2px;text-transform:uppercase;opacity:.8;user-select:none}
+#hint{position:fixed;left:16px;bottom:14px;color:var(--rose);font-size:13px;letter-spacing:1px;opacity:.7;transition:opacity 1s}
+#hint.hide{opacity:0}
+.tap{position:fixed;top:0;bottom:40px;width:30%;cursor:pointer}
+#prev{left:0}#next{right:0}
+#notes{position:fixed;left:0;right:0;bottom:0;max-height:34vh;overflow:auto;background:#1A0509;color:#EDD6C2;padding:18px 28px;font-size:16px;line-height:1.55;border-top:1px solid #7A3A42;display:none}
+body.presenter #notes{display:block}
+body.presenter #stage{bottom:34vh}
+@media (max-width:700px){#hint{display:none}}
+
+/* animations: run when a slide becomes active */
+.active [data-stagger]>*{animation:fadeUp .6s both;animation-delay:calc(.12s + var(--k,0)*.1s)}
+.active [data-anim="rise"]{animation:fadeUp .7s both;animation-delay:calc(.2s + (var(--i,1) - 1)*.35s)}
+.active [data-anim="stamp"]{animation:stamp .5s cubic-bezier(.2,1.4,.4,1) both;animation-delay:calc(.4s + (var(--i,1) - 1)*.28s)}
+.active [data-anim="glow"]{animation:glow .8s both;animation-delay:calc(1.4s + (var(--i,1) - 1)*.04s)}
+.active [data-anim="glowtext"]{animation:glowtext 1.2s both;animation-delay:1.2s}
+.active [data-anim="mark"]{animation:stamp .45s cubic-bezier(.2,1.4,.4,1) both;animation-delay:calc(.5s + (var(--i,1) - 1)*.5s)}
+.active [data-anim="late"]{animation:fadeUp .6s both;animation-delay:calc(2.4s + (var(--i,1) - 1)*.25s)}
+.active [data-anim="bar"]{animation:grow 1.4s cubic-bezier(.2,.8,.2,1) both;animation-delay:.6s}
+.active [data-anim="pulse"]{animation:pulse 1.6s ease-in-out 2.4s infinite}
+.active [data-anim="drop"]{animation:drop .5s cubic-bezier(.2,1.2,.4,1) both;animation-delay:calc(.3s + (var(--i,1) - 1)*.18s)}
+.active [data-anim="blink"]{animation:blink 1.2s ease-in-out infinite}
+.active [data-anim="ring"]{animation:ring 2.4s ease-in-out infinite}
+.active [data-anim="expose"]{animation:expose 3s ease-in-out .4s both}
+.active [data-anim="expose"]>*{animation:fadeIn 1s both 1.6s}
+.active [data-anim="bead"]{animation:bead 1.2s ease-in-out both;animation-delay:calc(.8s + (var(--i,1) - 1)*.07s)}
+.active [data-anim="print"]{animation:print 1.6s cubic-bezier(.2,.8,.2,1) both .6s}
+.active [data-anim="token"]{animation:stamp .5s cubic-bezier(.2,1.4,.4,1) both;animation-delay:calc(1.2s + (var(--i,1) - 1)*.6s)}
+.active [data-anim="darken"]{animation:darken 2s ease-in-out both .6s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes stamp{from{opacity:0;transform:rotate(-14deg) scale(0)}60%{opacity:1;transform:rotate(-14deg) scale(1.25)}to{opacity:1;transform:rotate(-14deg) scale(1)}}
+@keyframes glow{from{background:#6B2731;box-shadow:none}to{background:#D8B8FF;box-shadow:0 0 12px #B07CFF}}
+@keyframes glowtext{from{color:#5A2A36;text-shadow:none}to{color:#C9A0FF;text-shadow:0 0 18px #9B5CFF,0 0 36px #7B3FA0}}
+@keyframes grow{from{width:0}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 10px rgba(200,16,46,.25)}50%{box-shadow:0 0 0 22px rgba(200,16,46,0)}}
+@keyframes drop{from{opacity:0;transform:translateY(-30px) rotate(-3deg)}to{opacity:1}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+@keyframes ring{0%,100%{box-shadow:0 0 24px #FFE7C2}50%{box-shadow:0 0 48px #FFE7C2}}
+@keyframes expose{from{background:#E9F0D9}to{background:#1E3F8A}}
+@keyframes bead{from{background:#FFFFFF;border:2px solid #C9B6A6}}
+@keyframes print{from{transform:translateY(-110%);opacity:0}to{transform:none;opacity:1}}
+@keyframes darken{from{background:#8E7F86}to{background:#2A2126}}
+@media (prefers-reduced-motion:reduce){.active [data-anim],.active [data-stagger]>*{animation:none!important}}
+</style>
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section id="cover" style="background:#4A141C;color:#EDD6C2;font-family:'DM Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:space-between">
+<div style="display:flex;flex-direction:row;justify-content:space-between;align-items:start">
+<img src="assets/chosen-logo.png" alt="CHOSEN by Dermatology" style="width:700px;height:170px;object-fit:contain">
+<div style="display:flex;flex-direction:row;align-items:center;gap:32px"><svg aria-label="LIFEATBRIDGE bridge mark" viewBox="0 0 64 100" style="width:122px;height:190px"><rect x="4" y="4" width="9" height="92" fill="#EDD6C2"/><path d="M13 7 Q60 7 60 29 Q60 50 13 50" fill="none" stroke="#EDD6C2" stroke-width="6"/><path d="M13 50 Q60 50 60 71 Q60 93 13 93" fill="none" stroke="#EDD6C2" stroke-width="6"/><rect x="13" y="17" width="30" height="3" fill="#EDD6C2"/><rect x="13" y="27" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="38" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="60" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="71" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="82" width="30" height="3" fill="#EDD6C2"/></svg><div style="display:flex;flex-direction:column;gap:6px"><p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:72px;font-weight:600;letter-spacing:5px;line-height:1.1;color:#EDD6C2;white-space:nowrap">LIFE<i>at</i>BRIDGE</p><p style="font-size:30px;letter-spacing:14px;line-height:1.2;color:#EDD6C2;font-weight:500;white-space:nowrap">EVENTS</p></div></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px">
+<p style="font-size:24px;letter-spacing:6px;text-transform:uppercase;color:#C98A8F;font-weight:500">Brand activation proposal · CHOSEN by Dermatology</p>
+<h1 data-anim="rise" style="font-family:'Cormorant Garamond', Georgia, serif;font-size:160px;font-weight:600;line-height:0.95;color:#EDD6C2;width:1500px">Know Your Exposome</h1>
+<p style="font-size:34px;line-height:1.3;color:#EDD6C2;width:1300px">Fun, hands-on activities for 150 CHOSEN customers and creators, inside the auditorium and in the first-floor foyer.</p>
+<p style="font-size:28px;line-height:1.4;color:#C98A8F">Saturday 31 October 2026 · Bangalore International Centre, Domlur · 11:00–14:30 · Production and execution by LIFEATBRIDGE EVENTS</p>
+</div>
+</section>
+
+<section id="brief" style="background:#F7F0E8;color:#2B1A1C;font-family:'DM Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C8102E;font-weight:600">The brief, as we read it</p>
+<h2 style="font-family:'Cormorant Garamond', Georgia, serif;font-size:72px;font-weight:600;line-height:1.05;width:1500px">One afternoon to teach 150 people the word “exposome”</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:24px" data-stagger>
+<div style="background:#4A141C;padding:36px 32px;border-radius:16px;display:flex;flex-direction:column;gap:12px">
+<p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:96px;font-weight:600;line-height:1;color:#EDD6C2">150</p>
+<p style="font-size:26px;line-height:1.35;color:#EDD6C2">Guests: regular CHOSEN users, creators, press and partners</p>
+</div>
+<div style="background:#FFFFFF;border:1px solid #E4D6CC;padding:36px 32px;border-radius:16px;display:flex;flex-direction:column;gap:12px">
+<p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:96px;font-weight:600;line-height:1;color:#4A141C">3.5h</p>
+<p style="font-size:26px;line-height:1.35;color:#4B3A3D">11:00 to 14:30. A seated talk and panel, then free movement between zones</p>
+</div>
+<div style="background:#FFFFFF;border:1px solid #E4D6CC;padding:36px 32px;border-radius:16px;display:flex;flex-direction:column;gap:12px">
+<p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:96px;font-weight:600;line-height:1;color:#4A141C">80%</p>
+<p style="font-size:26px;line-height:1.35;color:#4B3A3D">Target: 80% of guests leave with their own exposome map</p>
+</div>
+<div style="background:#FFFFFF;border:1px solid #E4D6CC;padding:36px 32px;border-radius:16px;display:flex;flex-direction:column;gap:12px">
+<p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:96px;font-weight:600;line-height:1;color:#4A141C">Zero</p>
+<p style="font-size:26px;line-height:1.35;color:#4B3A3D">Nothing that feels like a normal launch event, and nothing that feels like a report card</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#8A6F72">Know Your Exposome · Activation proposal · 02</p>
+<div style="position:absolute;right:128px;bottom:28px;width:470px;height:128px;background:#4A141C;border:1px solid #7A3A42;border-radius:12px;padding:14px 26px;display:flex;flex-direction:row;align-items:center;gap:22px"><svg aria-label="LIFEATBRIDGE bridge mark" viewBox="0 0 64 100" style="width:58px;height:90px"><rect x="4" y="4" width="9" height="92" fill="#EDD6C2"/><path d="M13 7 Q60 7 60 29 Q60 50 13 50" fill="none" stroke="#EDD6C2" stroke-width="6"/><path d="M13 50 Q60 50 60 71 Q60 93 13 93" fill="none" stroke="#EDD6C2" stroke-width="6"/><rect x="13" y="17" width="30" height="3" fill="#EDD6C2"/><rect x="13" y="27" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="38" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="60" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="71" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="82" width="30" height="3" fill="#EDD6C2"/></svg><div style="display:flex;flex-direction:column;gap:2px"><p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:42px;font-weight:600;letter-spacing:3px;line-height:1.1;color:#EDD6C2;white-space:nowrap">LIFE<i>at</i>BRIDGE</p><p style="font-size:24px;letter-spacing:9px;line-height:1.2;color:#EDD6C2;font-weight:500;white-space:nowrap">EVENTS</p></div></div>
+</section>
+
+<section id="principles" style="background:#F7F0E8;color:#2B1A1C;font-family:'DM Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C8102E;font-weight:600">Our activation rules</p>
+<h2 style="font-family:'Cormorant Garamond', Georgia, serif;font-size:72px;font-weight:600;line-height:1.05;width:1500px">Playful science. Every activity follows five rules.</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:20px" data-stagger>
+<div style="background:#FFFFFF;border:1px solid #E4D6CC;border-top:6px solid #C8102E;padding:32px 28px;border-radius:16px;display:flex;flex-direction:column;gap:14px">
+<p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:64px;font-weight:600;line-height:1;color:#C8102E">01</p>
+<h3 style="font-size:30px;font-weight:600;line-height:1.2;color:#4A141C">One factor per activity</h3>
+<p style="font-size:24px;line-height:1.4;color:#4B3A3D">UV, pollution, blue light, sleep, stress, diet or water. One at a time, never a lecture.</p>
+</div>
+<div style="background:#FFFFFF;border:1px solid #E4D6CC;border-top:6px solid #C8102E;padding:32px 28px;border-radius:16px;display:flex;flex-direction:column;gap:14px">
+<p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:64px;font-weight:600;line-height:1;color:#C8102E">02</p>
+<h3 style="font-size:30px;font-weight:600;line-height:1.2;color:#4A141C">Done in under three minutes</h3>
+<p style="font-size:24px;line-height:1.4;color:#4B3A3D">150 guests and two hours. Long queues kill the mood, so every activity is quick.</p>
+</div>
+<div style="background:#FFFFFF;border:1px solid #E4D6CC;border-top:6px solid #C8102E;padding:32px 28px;border-radius:16px;display:flex;flex-direction:column;gap:14px">
+<p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:64px;font-weight:600;line-height:1;color:#C8102E">03</p>
+<h3 style="font-size:30px;font-weight:600;line-height:1.2;color:#4A141C">Guests take something home</h3>
+<p style="font-size:24px;line-height:1.4;color:#4B3A3D">A print, a bracelet, a stamp, a receipt. People photograph and keep objects.</p>
+</div>
+<div style="background:#FFFFFF;border:1px solid #E4D6CC;border-top:6px solid #C8102E;padding:32px 28px;border-radius:16px;display:flex;flex-direction:column;gap:14px">
+<p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:64px;font-weight:600;line-height:1;color:#C8102E">04</p>
+<h3 style="font-size:30px;font-weight:600;line-height:1.2;color:#4A141C">Information, never blame</h3>
+<p style="font-size:24px;line-height:1.4;color:#4B3A3D">All wording, scoring and hosts follow one rule from the brief: not your fault, your information.</p>
+</div>
+<div style="background:#FFFFFF;border:1px solid #E4D6CC;border-top:6px solid #C8102E;padding:32px 28px;border-radius:16px;display:flex;flex-direction:column;gap:14px">
+<p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:64px;font-weight:600;line-height:1;color:#C8102E">05</p>
+<h3 style="font-size:30px;font-weight:600;line-height:1.2;color:#4A141C">Easy to film</h3>
+<p style="font-size:24px;line-height:1.4;color:#4B3A3D">Good light for phones, vertical framing, and a visible change the camera can catch.</p>
+</div>
+</div>
+<p style="font-size:28px;line-height:1.4;color:#4B3A3D;width:1500px">Every claim on anything printed or shown goes to Dr. Renita for approval before production, as the brief requires.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#8A6F72">Know Your Exposome · Activation proposal · 03</p>
+<div style="position:absolute;right:128px;bottom:28px;width:470px;height:128px;background:#4A141C;border:1px solid #7A3A42;border-radius:12px;padding:14px 26px;display:flex;flex-direction:row;align-items:center;gap:22px"><svg aria-label="LIFEATBRIDGE bridge mark" viewBox="0 0 64 100" style="width:58px;height:90px"><rect x="4" y="4" width="9" height="92" fill="#EDD6C2"/><path d="M13 7 Q60 7 60 29 Q60 50 13 50" fill="none" stroke="#EDD6C2" stroke-width="6"/><path d="M13 50 Q60 50 60 71 Q60 93 13 93" fill="none" stroke="#EDD6C2" stroke-width="6"/><rect x="13" y="17" width="30" height="3" fill="#EDD6C2"/><rect x="13" y="27" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="38" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="60" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="71" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="82" width="30" height="3" fill="#EDD6C2"/></svg><div style="display:flex;flex-direction:column;gap:2px"><p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:42px;font-weight:600;letter-spacing:3px;line-height:1.1;color:#EDD6C2;white-space:nowrap">LIFE<i>at</i>BRIDGE</p><p style="font-size:24px;letter-spacing:9px;line-height:1.2;color:#EDD6C2;font-weight:500;white-space:nowrap">EVENTS</p></div></div>
+</section>
+
+<section id="venue" style="background:#F7F0E8;color:#2B1A1C;font-family:'DM Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C8102E;font-weight:600">The venue · Bangalore International Centre, first floor only</p>
+<h2 style="font-family:'Cormorant Garamond', Georgia, serif;font-size:72px;font-weight:600;line-height:1.05;width:1500px">Two spaces, two kinds of activity</h2>
+<div style="display:flex;flex-direction:row;gap:28px">
+<div style="width:760px;display:flex;flex-direction:column;gap:20px">
+<img src="assets/bic-auditorium.jpg" alt="BIC auditorium seen from the rear seats, thrust stage with three chairs" style="width:760px;height:300px;object-fit:cover;border-radius:16px">
+<div style="display:flex;flex-direction:row;gap:20px">
+<img src="assets/foyer-lounge.jpg" alt="First-floor foyer, lounge end" style="width:370px;height:220px;object-fit:cover;border-radius:16px">
+<img src="assets/foyer-glass.jpg" alt="First-floor foyer, glass end" style="width:370px;height:220px;object-fit:cover;border-radius:16px">
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px" data-stagger>
+<div style="background:#4A141C;padding:28px;border-radius:14px;display:flex;flex-direction:column;gap:8px">
+<h3 style="font-size:30px;font-weight:600;color:#EDD6C2">Auditorium · 181 seats for 150 guests</h3>
+<p style="font-size:24px;line-height:1.4;color:#EDD6C2">A stage with a front apron, a 6.5 m projection screen, six motorised light bars with a lighting console, four wireless mics and two green rooms behind the stage. Guests enter from the back. Seated activities happen here: the envelope, the lights-down reveal, bingo, the live vote and the stand-up.</p>
+</div>
+<div style="background:#FFFFFF;border:1px solid #E4D6CC;padding:28px;border-radius:14px;display:flex;flex-direction:column;gap:8px">
+<h3 style="font-size:30px;font-weight:600;color:#4A141C">First-floor foyer · lounge end and glass end</h3>
+<p style="font-size:24px;line-height:1.4;color:#4B3A3D">Lounge end: registration, CHOSEN’s three zones, food service and the goodie bag counter. Glass end: our lab tables, the floor game and the content studio, in natural light.</p>
+</div>
+<p style="font-size:24px;line-height:1.4;color:#8A6F72">Ground floor and rooftop are not available. Final layout drawn on BIC’s first-floor plan at the site visit.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#8A6F72">Know Your Exposome · Activation proposal · 04</p>
+<div style="position:absolute;right:128px;bottom:28px;width:470px;height:128px;background:#4A141C;border:1px solid #7A3A42;border-radius:12px;padding:14px 26px;display:flex;flex-direction:row;align-items:center;gap:22px"><svg aria-label="LIFEATBRIDGE bridge mark" viewBox="0 0 64 100" style="width:58px;height:90px"><rect x="4" y="4" width="9" height="92" fill="#EDD6C2"/><path d="M13 7 Q60 7 60 29 Q60 50 13 50" fill="none" stroke="#EDD6C2" stroke-width="6"/><path d="M13 50 Q60 50 60 71 Q60 93 13 93" fill="none" stroke="#EDD6C2" stroke-width="6"/><rect x="13" y="17" width="30" height="3" fill="#EDD6C2"/><rect x="13" y="27" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="38" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="60" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="71" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="82" width="30" height="3" fill="#EDD6C2"/></svg><div style="display:flex;flex-direction:column;gap:2px"><p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:42px;font-weight:600;letter-spacing:3px;line-height:1.1;color:#EDD6C2;white-space:nowrap">LIFE<i>at</i>BRIDGE</p><p style="font-size:24px;letter-spacing:9px;line-height:1.2;color:#EDD6C2;font-weight:500;white-space:nowrap">EVENTS</p></div></div>
+</section>
+
+<section id="journey" style="background:#F7F0E8;color:#2B1A1C;font-family:'DM Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C8102E;font-weight:600">The guest journey</p>
+<h2 style="font-family:'Cormorant Garamond', Georgia, serif;font-size:72px;font-weight:600;line-height:1.05;width:1500px">Six stops. Every one of them earns a stamp.</h2>
+<p style="font-size:28px;line-height:1.4;color:#4B3A3D;width:1500px">Guests arrive in the foyer and collect a passport. They sit for the talk and panel. Then they move freely between CHOSEN’s zones at the lounge end and our lab tables at the glass end, and collect their goodie bag at the exit. The passport shows them where to go next, so very little signage is needed.</p>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;gap:16px" data-stagger>
+<div style="background:#FFFFFF;border:1px solid #E4D6CC;border-top:6px solid #C8102E;padding:24px 20px;border-radius:14px;display:flex;flex-direction:column;gap:10px;align-items:center">
+<p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:72px;font-weight:600;line-height:1;color:#C8102E">1</p>
+<h3 style="font-size:28px;font-weight:600;color:#4A141C;text-align:center">Arrival</h3>
+<p style="font-size:24px;line-height:1.3;color:#4B3A3D;text-align:center">Welcome drink, 11:00</p>
+</div>
+<div style="background:#FFFFFF;border:1px solid #E4D6CC;border-top:6px solid #C8102E;padding:24px 20px;border-radius:14px;display:flex;flex-direction:column;gap:10px;align-items:center">
+<p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:72px;font-weight:600;line-height:1;color:#C8102E">2</p>
+<h3 style="font-size:28px;font-weight:600;color:#4A141C;text-align:center">Passport</h3>
+<p style="font-size:24px;line-height:1.3;color:#4B3A3D;text-align:center">Issued at registration</p>
+</div>
+<div style="background:#FFFFFF;border:1px solid #E4D6CC;border-top:6px solid #C8102E;padding:24px 20px;border-radius:14px;display:flex;flex-direction:column;gap:10px;align-items:center">
+<p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:72px;font-weight:600;line-height:1;color:#C8102E">3</p>
+<h3 style="font-size:28px;font-weight:600;color:#4A141C;text-align:center">Auditorium</h3>
+<p style="font-size:24px;line-height:1.3;color:#4B3A3D;text-align:center">Talk, vote, panel, stand-up</p>
+</div>
+<div style="background:#FFFFFF;border:1px solid #E4D6CC;border-top:6px solid #C8102E;padding:24px 20px;border-radius:14px;display:flex;flex-direction:column;gap:10px;align-items:center">
+<p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:72px;font-weight:600;line-height:1;color:#C8102E">4</p>
+<h3 style="font-size:28px;font-weight:600;color:#4A141C;text-align:center">CHOSEN zones</h3>
+<p style="font-size:24px;line-height:1.3;color:#4B3A3D;text-align:center">Map, Proof Bench, Younger Room</p>
+</div>
+<div style="background:#FFFFFF;border:1px solid #E4D6CC;border-top:6px solid #C8102E;padding:24px 20px;border-radius:14px;display:flex;flex-direction:column;gap:10px;align-items:center">
+<p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:72px;font-weight:600;line-height:1;color:#C8102E">5</p>
+<h3 style="font-size:28px;font-weight:600;color:#4A141C;text-align:center">Our lab tables</h3>
+<p style="font-size:24px;line-height:1.3;color:#4B3A3D;text-align:center">UV print, beads, receipt, floor game</p>
+</div>
+<div style="background:#FFFFFF;border:1px solid #E4D6CC;border-top:6px solid #C8102E;padding:24px 20px;border-radius:14px;display:flex;flex-direction:column;gap:10px;align-items:center">
+<p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:72px;font-weight:600;line-height:1;color:#C8102E">6</p>
+<h3 style="font-size:28px;font-weight:600;color:#4A141C;text-align:center">Goodie bag</h3>
+<p style="font-size:24px;line-height:1.3;color:#4B3A3D;text-align:center">Passport checked at the exit</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;gap:20px;align-items:center;background:#EDD6C2;padding:20px 28px;border-radius:12px">
+<svg viewBox="0 0 24 24" style="width:36px;height:36px;flex:none" aria-label="check"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#C8102E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<p style="font-size:26px;line-height:1.35;color:#4A141C">Everything is on the first floor. Guests use their phones only for the live vote and in the Content Lab; everything else is hands-on. Stops 4 and 5 share the foyer: CHOSEN’s zones near the exit, our tables near the glass wall, so the crowd spreads out.</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#8A6F72">Know Your Exposome · Activation proposal · 05</p>
+<div style="position:absolute;right:128px;bottom:28px;width:470px;height:128px;background:#4A141C;border:1px solid #7A3A42;border-radius:12px;padding:14px 26px;display:flex;flex-direction:row;align-items:center;gap:22px"><svg aria-label="LIFEATBRIDGE bridge mark" viewBox="0 0 64 100" style="width:58px;height:90px"><rect x="4" y="4" width="9" height="92" fill="#EDD6C2"/><path d="M13 7 Q60 7 60 29 Q60 50 13 50" fill="none" stroke="#EDD6C2" stroke-width="6"/><path d="M13 50 Q60 50 60 71 Q60 93 13 93" fill="none" stroke="#EDD6C2" stroke-width="6"/><rect x="13" y="17" width="30" height="3" fill="#EDD6C2"/><rect x="13" y="27" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="38" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="60" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="71" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="82" width="30" height="3" fill="#EDD6C2"/></svg><div style="display:flex;flex-direction:column;gap:2px"><p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:42px;font-weight:600;letter-spacing:3px;line-height:1.1;color:#EDD6C2;white-space:nowrap">LIFE<i>at</i>BRIDGE</p><p style="font-size:24px;letter-spacing:9px;line-height:1.2;color:#EDD6C2;font-weight:500;white-space:nowrap">EVENTS</p></div></div>
+</section>
+
+<section id="seatdrop" style="background:#4A141C;color:#EDD6C2;font-family:'DM Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:20px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C98A8F;font-weight:600">Inside the auditorium · Activation 01 · no phones</p>
+<h2 style="font-family:'Cormorant Garamond', Georgia, serif;font-size:64px;font-weight:600;line-height:1.05;width:1664px;color:#EDD6C2">The envelope, and the lights-down reveal</h2>
+<div style="display:flex;flex-direction:row;gap:56px;align-items:start">
+<div style="width:960px;display:flex;flex-direction:column;gap:16px">
+<p style="font-size:26px;line-height:1.4;color:#EDD6C2"><b>The idea.</b> Every seat has a sealed envelope that says “Do not open until the lights go down.” Inside: a white bead bracelet, a bingo card, a pencil and an anonymous confession card. Thirty seconds into Dr. Renita’s welcome, the room goes dark and UV lights come on. A hidden line printed in invisible ink appears on every envelope: “You can’t see what is ageing your skin. Until now.”</p>
+<p style="font-size:26px;line-height:1.4;color:#EDD6C2"><b>Why it works.</b> Guests see the idea of the exposome instead of being told about it, in the first minute. Fifteen envelopes have a red seal: a skip-the-queue pass for the Younger Room, which the brief expects to be the busiest spot.</p>
+<div style="background:#F7F0E8;padding:20px 28px;border-radius:14px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#C8102E;font-weight:600">Production required</h3>
+<ul style="font-size:24px;line-height:1.4;color:#2B1A1C"><li>160 envelopes printed with invisible UV ink (tested first), 15 with red seals; 160 bracelets, bingo cards, confession cards and pencils</li><li>8 to 12 rented UV lights hung on BIC’s existing light bars and run from BIC’s lighting console; we test the blackout and the ink at the site visit</li><li>Four crew place the envelopes before doors open; all wording approved by Dr. Renita</li></ul>
+</div>
+</div>
+<div style="width:648px;background:#2A0C12;border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C98A8F;font-weight:600">Mock-up · inside, then the reveal</p>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+<div style="background:#F7F0E8;border-radius:10px;padding:14px 12px;display:flex;flex-direction:column;gap:8px" data-anim="rise" data-i="1"><p style="font-size:24px;font-weight:600;color:#4A141C">Bracelet</p><div style="display:flex;flex-direction:row;gap:4px"><div style="width:20px;height:20px;border-radius:50%;background:#FFFFFF;border:2px solid #C9B6A6"></div><div style="width:20px;height:20px;border-radius:50%;background:#FFFFFF;border:2px solid #C9B6A6"></div><div style="width:20px;height:20px;border-radius:50%;background:#FFFFFF;border:2px solid #C9B6A6"></div><div style="width:20px;height:20px;border-radius:50%;background:#8E5BD6;border:2px solid #7B3FA0"></div><div style="width:20px;height:20px;border-radius:50%;background:#8E5BD6;border:2px solid #7B3FA0"></div></div></div>
+<div style="background:#F7F0E8;border-radius:10px;padding:14px 12px;display:flex;flex-direction:column;gap:8px" data-anim="rise" data-i="2"><p style="font-size:24px;font-weight:600;color:#4A141C">Bingo card</p><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px"><div style="height:14px;background:#FFFFFF;border:1px solid #E4D6CC"></div><div style="height:14px;background:#FFFFFF;border:1px solid #E4D6CC"></div><div style="height:14px;background:#FFFFFF;border:1px solid #E4D6CC"></div><div style="height:14px;background:#FFFFFF;border:1px solid #E4D6CC"></div><div style="height:14px;background:#FFFFFF;border:1px solid #E4D6CC"></div><div style="height:14px;background:#FFFFFF;border:1px solid #E4D6CC"></div></div></div>
+<div style="background:#F7F0E8;border-radius:10px;padding:14px 12px;display:flex;flex-direction:column;gap:8px" data-anim="rise" data-i="3"><p style="font-size:24px;font-weight:600;color:#4A141C">Confession</p><p style="font-size:24px;line-height:1.15;color:#8A6F72;font-style:italic">“The worst thing I do to my skin is…”</p></div>
+</div>
+<div style="background:#120408;border-radius:12px;padding:22px 20px;display:flex;flex-direction:column;gap:12px;align-items:center">
+<p style="font-size:26px;font-weight:600;letter-spacing:2px;color:#C9A0FF;text-align:center;text-shadow:0 0 18px #9B5CFF, 0 0 36px #7B3FA0" data-anim="glowtext">YOU CAN’T SEE WHAT IS AGEING YOUR SKIN. UNTIL NOW.</p>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;gap:8px;width:560px">
+<div style="height:28px;border-radius:6px;background:#D8B8FF;box-shadow:0 0 12px #B07CFF" data-anim="glow" data-i="1"></div><div style="height:28px;border-radius:6px;background:#D8B8FF;box-shadow:0 0 12px #B07CFF" data-anim="glow" data-i="2"></div><div style="height:28px;border-radius:6px;background:#D8B8FF;box-shadow:0 0 12px #B07CFF" data-anim="glow" data-i="3"></div><div style="height:28px;border-radius:6px;background:#D8B8FF;box-shadow:0 0 12px #B07CFF" data-anim="glow" data-i="4"></div><div style="height:28px;border-radius:6px;background:#D8B8FF;box-shadow:0 0 12px #B07CFF" data-anim="glow" data-i="5"></div><div style="height:28px;border-radius:6px;background:#D8B8FF;box-shadow:0 0 12px #B07CFF" data-anim="glow" data-i="6"></div><div style="height:28px;border-radius:6px;background:#D8B8FF;box-shadow:0 0 12px #B07CFF" data-anim="glow" data-i="7"></div><div style="height:28px;border-radius:6px;background:#D8B8FF;box-shadow:0 0 12px #B07CFF" data-anim="glow" data-i="8"></div>
+<div style="height:28px;border-radius:6px;background:#D8B8FF;box-shadow:0 0 12px #B07CFF" data-anim="glow" data-i="9"></div><div style="height:28px;border-radius:6px;background:#D8B8FF;box-shadow:0 0 12px #B07CFF" data-anim="glow" data-i="10"></div><div style="height:28px;border-radius:6px;background:#D8B8FF;box-shadow:0 0 12px #B07CFF" data-anim="glow" data-i="11"></div><div style="height:28px;border-radius:6px;background:#D8B8FF;box-shadow:0 0 12px #B07CFF" data-anim="glow" data-i="12"></div><div style="height:28px;border-radius:6px;background:#D8B8FF;box-shadow:0 0 12px #B07CFF" data-anim="glow" data-i="13"></div><div style="height:28px;border-radius:6px;background:#D8B8FF;box-shadow:0 0 12px #B07CFF" data-anim="glow" data-i="14"></div><div style="height:28px;border-radius:6px;background:#D8B8FF;box-shadow:0 0 12px #B07CFF" data-anim="glow" data-i="15"></div><div style="height:28px;border-radius:6px;background:#D8B8FF;box-shadow:0 0 12px #B07CFF" data-anim="glow" data-i="16"></div>
+</div>
+<p style="font-size:24px;color:#B06CFF;text-align:center">Lights off, UV on, 150 envelopes glow</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#C98A8F">Know Your Exposome · Activation proposal · 06</p>
+<div style="position:absolute;right:128px;bottom:28px;width:470px;height:128px;background:#4A141C;border:1px solid #7A3A42;border-radius:12px;padding:14px 26px;display:flex;flex-direction:row;align-items:center;gap:22px"><svg aria-label="LIFEATBRIDGE bridge mark" viewBox="0 0 64 100" style="width:58px;height:90px"><rect x="4" y="4" width="9" height="92" fill="#EDD6C2"/><path d="M13 7 Q60 7 60 29 Q60 50 13 50" fill="none" stroke="#EDD6C2" stroke-width="6"/><path d="M13 50 Q60 50 60 71 Q60 93 13 93" fill="none" stroke="#EDD6C2" stroke-width="6"/><rect x="13" y="17" width="30" height="3" fill="#EDD6C2"/><rect x="13" y="27" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="38" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="60" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="71" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="82" width="30" height="3" fill="#EDD6C2"/></svg><div style="display:flex;flex-direction:column;gap:2px"><p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:42px;font-weight:600;letter-spacing:3px;line-height:1.1;color:#EDD6C2;white-space:nowrap">LIFE<i>at</i>BRIDGE</p><p style="font-size:24px;letter-spacing:9px;line-height:1.2;color:#EDD6C2;font-weight:500;white-space:nowrap">EVENTS</p></div></div>
+</section>
+
+<section id="bingo" style="background:#F7F0E8;color:#2B1A1C;font-family:'DM Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:20px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C8102E;font-weight:600">Inside the auditorium · Activation 02 · during the panel · no phones</p>
+<h2 style="font-family:'Cormorant Garamond', Georgia, serif;font-size:64px;font-weight:600;line-height:1.05;width:1664px">Exposome Bingo</h2>
+<div style="display:flex;flex-direction:row;gap:56px;align-items:start">
+<div style="width:960px;display:flex;flex-direction:column;gap:16px">
+<p style="font-size:26px;line-height:1.4;color:#4B3A3D"><b>The idea.</b> The bingo card in the envelope has twenty exposome words, such as UV index, PM2.5, blue light, sleep debt and melanin. When a panellist says a word, guests tick it. The first person to complete a line stands up and shouts “Exposed!”</p>
+<p style="font-size:26px;line-height:1.4;color:#4B3A3D"><b>Why it works.</b> People usually switch off during a 30-minute science panel. Bingo makes 150 people listen for the exact words CHOSEN wants them to remember, and say them out loud.</p>
+<div style="background:#4A141C;padding:20px 28px;border-radius:14px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#EDD6C2;font-weight:600">Production required</h3>
+<ul style="font-size:24px;line-height:1.4;color:#EDD6C2"><li>160 cards in six different layouts so winners come at different times; word list approved by Dr. Renita and shared with the moderator and panellists</li><li>A roving mic for each winner, three prizes from CHOSEN, a cue for the host in the script</li><li>The audience camera films each winner for same-day photos</li></ul>
+</div>
+</div>
+<div style="width:648px;background:#FFFFFF;border:2px solid #E4D6CC;border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:14px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C8102E;font-weight:600">Mock-up · a completed top line</p>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">
+<div style="background:#FBE3E7;border:3px solid #C8102E;border-radius:8px;padding:12px 4px;display:flex;align-items:center;justify-content:center" data-anim="mark" data-i="1"><p style="font-size:24px;font-weight:600;color:#C8102E;text-align:center">UV index</p></div>
+<div style="background:#FBE3E7;border:3px solid #C8102E;border-radius:8px;padding:12px 4px;display:flex;align-items:center;justify-content:center" data-anim="mark" data-i="2"><p style="font-size:24px;font-weight:600;color:#C8102E;text-align:center">PM2.5</p></div>
+<div style="background:#FBE3E7;border:3px solid #C8102E;border-radius:8px;padding:12px 4px;display:flex;align-items:center;justify-content:center" data-anim="mark" data-i="3"><p style="font-size:24px;font-weight:600;color:#C8102E;text-align:center">Blue light</p></div>
+<div style="background:#FBE3E7;border:3px solid #C8102E;border-radius:8px;padding:12px 4px;display:flex;align-items:center;justify-content:center" data-anim="mark" data-i="4"><p style="font-size:24px;font-weight:600;color:#C8102E;text-align:center">Melanin</p></div>
+<div style="background:#F7F0E8;border:2px solid #E4D6CC;border-radius:8px;padding:12px 4px;display:flex;align-items:center;justify-content:center"><p style="font-size:24px;font-weight:600;color:#4A141C;text-align:center">Sleep debt</p></div>
+<div style="background:#FBE3E7;border:3px solid #C8102E;border-radius:8px;padding:12px 4px;display:flex;align-items:center;justify-content:center" data-anim="mark" data-i="5"><p style="font-size:24px;font-weight:600;color:#C8102E;text-align:center">Cortisol</p></div>
+<div style="background:#F7F0E8;border:2px solid #E4D6CC;border-radius:8px;padding:12px 4px;display:flex;align-items:center;justify-content:center"><p style="font-size:24px;font-weight:600;color:#4A141C;text-align:center">Barrier</p></div>
+<div style="background:#F7F0E8;border:2px solid #E4D6CC;border-radius:8px;padding:12px 4px;display:flex;align-items:center;justify-content:center"><p style="font-size:24px;font-weight:600;color:#4A141C;text-align:center">Collagen</p></div>
+<div style="background:#F7F0E8;border:2px solid #E4D6CC;border-radius:8px;padding:12px 4px;display:flex;align-items:center;justify-content:center"><p style="font-size:24px;font-weight:600;color:#4A141C;text-align:center">SPF</p></div>
+<div style="background:#F7F0E8;border:2px solid #E4D6CC;border-radius:8px;padding:12px 4px;display:flex;align-items:center;justify-content:center"><p style="font-size:24px;font-weight:600;color:#4A141C;text-align:center">Glycation</p></div>
+<div style="background:#F7F0E8;border:2px solid #E4D6CC;border-radius:8px;padding:12px 4px;display:flex;align-items:center;justify-content:center"><p style="font-size:24px;font-weight:600;color:#4A141C;text-align:center">Humidity</p></div>
+<div style="background:#F7F0E8;border:2px solid #E4D6CC;border-radius:8px;padding:12px 4px;display:flex;align-items:center;justify-content:center"><p style="font-size:24px;font-weight:600;color:#4A141C;text-align:center">Hard water</p></div>
+<div style="background:#F7F0E8;border:2px solid #E4D6CC;border-radius:8px;padding:12px 4px;display:flex;align-items:center;justify-content:center"><p style="font-size:24px;font-weight:600;color:#4A141C;text-align:center">Pollution</p></div>
+<div style="background:#F7F0E8;border:2px solid #E4D6CC;border-radius:8px;padding:12px 4px;display:flex;align-items:center;justify-content:center"><p style="font-size:24px;font-weight:600;color:#4A141C;text-align:center">Sun hours</p></div>
+<div style="background:#F7F0E8;border:2px solid #E4D6CC;border-radius:8px;padding:12px 4px;display:flex;align-items:center;justify-content:center"><p style="font-size:24px;font-weight:600;color:#4A141C;text-align:center">Hydration</p></div>
+<div style="background:#F7F0E8;border:2px solid #E4D6CC;border-radius:8px;padding:12px 4px;display:flex;align-items:center;justify-content:center"><p style="font-size:24px;font-weight:600;color:#4A141C;text-align:center">Exposome</p></div>
+</div>
+<p style="font-size:26px;font-weight:600;color:#C8102E;letter-spacing:3px;text-align:center" data-anim="late">EXPOSED!</p>
+<p style="font-size:24px;color:#8A6F72;text-align:center">Sixteen of the twenty words shown. Dr. Renita decides the final list.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#8A6F72">Know Your Exposome · Activation proposal · 07</p>
+<div style="position:absolute;right:128px;bottom:28px;width:470px;height:128px;background:#4A141C;border:1px solid #7A3A42;border-radius:12px;padding:14px 26px;display:flex;flex-direction:row;align-items:center;gap:22px"><svg aria-label="LIFEATBRIDGE bridge mark" viewBox="0 0 64 100" style="width:58px;height:90px"><rect x="4" y="4" width="9" height="92" fill="#EDD6C2"/><path d="M13 7 Q60 7 60 29 Q60 50 13 50" fill="none" stroke="#EDD6C2" stroke-width="6"/><path d="M13 50 Q60 50 60 71 Q60 93 13 93" fill="none" stroke="#EDD6C2" stroke-width="6"/><rect x="13" y="17" width="30" height="3" fill="#EDD6C2"/><rect x="13" y="27" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="38" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="60" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="71" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="82" width="30" height="3" fill="#EDD6C2"/></svg><div style="display:flex;flex-direction:column;gap:2px"><p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:42px;font-weight:600;letter-spacing:3px;line-height:1.1;color:#EDD6C2;white-space:nowrap">LIFE<i>at</i>BRIDGE</p><p style="font-size:24px;letter-spacing:9px;line-height:1.2;color:#EDD6C2;font-weight:500;white-space:nowrap">EVENTS</p></div></div>
+</section>
+
+<section id="mythbuster" style="background:#F7F0E8;color:#2B1A1C;font-family:'DM Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:20px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C8102E;font-weight:600">Inside the auditorium · Activation 03 · panel opener · the one phone moment</p>
+<h2 style="font-family:'Cormorant Garamond', Georgia, serif;font-size:64px;font-weight:600;line-height:1.05;width:1664px">Fact or Fiction: the room votes</h2>
+<div style="display:flex;flex-direction:row;gap:56px;align-items:start">
+<div style="width:960px;display:flex;flex-direction:column;gap:16px">
+<p style="font-size:26px;line-height:1.4;color:#4B3A3D"><b>The idea.</b> Five statements about skin appear on the big screen with a QR code. Guests scan it and tap Fact or Fiction. The results fill up live on screen. Then the panel gives the real answer. The difference between what the room thinks and what the science says is the perfect start for the panel.</p>
+<p style="font-size:26px;line-height:1.4;color:#4B3A3D"><b>Why it works.</b> The audience takes part before the panel starts, and the moderator gets five easy ways into the discussion. It takes five minutes, then phones go away.</p>
+<div style="background:#4A141C;padding:20px 28px;border-radius:14px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#EDD6C2;font-weight:600">Production required</h3>
+<ul style="font-size:24px;line-height:1.4;color:#EDD6C2"><li>A simple vote web page built and hosted by LIFEATBRIDGE, no software licence needed; results shown on the big screen from one laptop</li><li>Tested for 150 votes in ten seconds; a 4G router as backup to BIC Wi-Fi; if all else fails, a paper Fact/Fiction paddle in the envelope</li><li>Statements and verdicts written and signed off by Dr. Renita</li></ul>
+</div>
+</div>
+<div style="width:648px;background:#4A141C;border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:row;justify-content:space-between"><p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C98A8F;font-weight:600">Mock-up · vote 2 of 5</p><p style="font-size:24px;color:#C98A8F;font-weight:600">150 phones</p></div>
+<p style="font-size:30px;font-weight:600;line-height:1.25;color:#EDD6C2">“Sunscreen is only needed when I am outdoors.”</p>
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;flex-direction:row;justify-content:space-between"><p style="font-size:24px;font-weight:600;color:#EDD6C2">Fact</p><p style="font-size:24px;font-weight:600;color:#EDD6C2">71%</p></div>
+<div style="height:36px;border-radius:8px;background:#6B2731;display:flex;flex-direction:row"><div style="width:71%;height:36px;border-radius:8px;background:#EDD6C2" data-anim="bar" data-i="1"></div></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;flex-direction:row;justify-content:space-between"><p style="font-size:24px;font-weight:600;color:#EDD6C2">Fiction</p><p style="font-size:24px;font-weight:600;color:#EDD6C2">29%</p></div>
+<div style="height:36px;border-radius:8px;background:#6B2731;display:flex;flex-direction:row"><div style="width:29%;height:36px;border-radius:8px;background:#EDD6C2" data-anim="bar" data-i="2"></div></div>
+</div>
+<div style="background:#C8102E;border-radius:10px;padding:16px 20px" data-anim="late"><p style="font-size:24px;font-weight:600;line-height:1.3;color:#FFFFFF">The panel gives the answer. Dr. Renita writes both the statements and the answers.</p></div>
+<p style="font-size:24px;color:#C98A8F">Percentages are examples only. We build and test the vote page and results screen.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#8A6F72">Know Your Exposome · Activation proposal · 08</p>
+<div style="position:absolute;right:128px;bottom:28px;width:470px;height:128px;background:#4A141C;border:1px solid #7A3A42;border-radius:12px;padding:14px 26px;display:flex;flex-direction:row;align-items:center;gap:22px"><svg aria-label="LIFEATBRIDGE bridge mark" viewBox="0 0 64 100" style="width:58px;height:90px"><rect x="4" y="4" width="9" height="92" fill="#EDD6C2"/><path d="M13 7 Q60 7 60 29 Q60 50 13 50" fill="none" stroke="#EDD6C2" stroke-width="6"/><path d="M13 50 Q60 50 60 71 Q60 93 13 93" fill="none" stroke="#EDD6C2" stroke-width="6"/><rect x="13" y="17" width="30" height="3" fill="#EDD6C2"/><rect x="13" y="27" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="38" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="60" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="71" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="82" width="30" height="3" fill="#EDD6C2"/></svg><div style="display:flex;flex-direction:column;gap:2px"><p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:42px;font-weight:600;letter-spacing:3px;line-height:1.1;color:#EDD6C2;white-space:nowrap">LIFE<i>at</i>BRIDGE</p><p style="font-size:24px;letter-spacing:9px;line-height:1.2;color:#EDD6C2;font-weight:500;white-space:nowrap">EVENTS</p></div></div>
+</section>
+
+<section id="standup" style="background:#4A141C;color:#EDD6C2;font-family:'DM Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:20px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C98A8F;font-weight:600">Inside the auditorium · Activation 04 · the brand stand-up · no phones</p>
+<h2 style="font-family:'Cormorant Garamond', Georgia, serif;font-size:64px;font-weight:600;line-height:1.05;width:1664px;color:#EDD6C2">EXPOSED: a comedian, a dermatologist, a buzzer</h2>
+<div style="display:flex;flex-direction:row;gap:56px;align-items:start">
+<div style="width:960px;display:flex;flex-direction:column;gap:16px">
+<p style="font-size:26px;line-height:1.4;color:#EDD6C2"><b>The idea.</b> A twelve-minute comedy set about the exposome: Bengaluru traffic, scrolling at 2 a.m., the “I’m only outside for five minutes” sunscreen excuse. Half the jokes come from the audience’s own confession cards, collected during the Q&amp;A and given to the comedian ten minutes before.</p>
+<p style="font-size:26px;line-height:1.4;color:#EDD6C2"><b>The brand hook.</b> Dr. Renita sits beside the stage with a buzzer. After each joke, she gets one line to confirm or correct the science. The comedian sets it up; the dermatologist has the final word.</p>
+<div style="background:#F7F0E8;padding:20px 28px;border-radius:14px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#C8102E;font-weight:600">Production required</h3>
+<ul style="font-size:24px;line-height:1.4;color:#2B1A1C"><li>A shortlist of three Bengaluru comedians with clean, observational humour; fee and content release form; a writing session with CHOSEN two weeks before</li><li>A stool on stage, one of BIC’s wireless mics, a buzzer with a sound effect, one lighting look, two runners to collect cards</li><li>Two cameras for vertical video; three short clips edited the same day for creators</li></ul>
+</div>
+</div>
+<div style="width:648px;background:#2A0C12;border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C98A8F;font-weight:600">Mock-up · one beat of the set</p>
+<div style="display:flex;flex-direction:row;gap:16px;align-items:start">
+<div style="width:36px;display:flex;flex-direction:column;align-items:center"><div style="width:36px;height:60px;border-radius:18px;background:#EDD6C2"></div><div style="width:6px;height:120px;background:#8A6F72"></div></div>
+<div style="flex:1;background:#EDD6C2;border-radius:14px;padding:16px 20px" data-anim="rise" data-i="1"><p style="font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#C8102E;font-weight:600">Comedian · from the cards</p><p style="font-size:24px;line-height:1.3;font-weight:600;color:#4A141C">“Card no. 61: I apply sunscreen only on days I can see the sun. In Bengaluru. In monsoon.”</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:16px;align-items:center">
+<div style="flex:1;background:#C8102E;border-radius:14px;padding:16px 20px" data-anim="late" data-i="1"><p style="font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#FFD2D9;font-weight:600">Fact-check · Dr. Renita</p><p style="font-size:24px;line-height:1.3;font-weight:600;color:#FFFFFF">One line gives the real answer. Her words, not ours.</p></div>
+<div style="width:80px;display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:56px;height:56px;border-radius:50%;background:#C8102E;box-shadow:0 0 0 10px rgba(200,16,46,0.25)" data-anim="pulse"></div><p style="font-size:24px;color:#C98A8F;font-weight:600">Buzzer</p></div>
+</div>
+<p style="font-size:24px;line-height:1.35;color:#C98A8F">Twelve minutes, six jokes, six fact-checks. The brand speaks only through the corrections.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#C98A8F">Know Your Exposome · Activation proposal · 09</p>
+<div style="position:absolute;right:128px;bottom:28px;width:470px;height:128px;background:#4A141C;border:1px solid #7A3A42;border-radius:12px;padding:14px 26px;display:flex;flex-direction:row;align-items:center;gap:22px"><svg aria-label="LIFEATBRIDGE bridge mark" viewBox="0 0 64 100" style="width:58px;height:90px"><rect x="4" y="4" width="9" height="92" fill="#EDD6C2"/><path d="M13 7 Q60 7 60 29 Q60 50 13 50" fill="none" stroke="#EDD6C2" stroke-width="6"/><path d="M13 50 Q60 50 60 71 Q60 93 13 93" fill="none" stroke="#EDD6C2" stroke-width="6"/><rect x="13" y="17" width="30" height="3" fill="#EDD6C2"/><rect x="13" y="27" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="38" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="60" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="71" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="82" width="30" height="3" fill="#EDD6C2"/></svg><div style="display:flex;flex-direction:column;gap:2px"><p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:42px;font-weight:600;letter-spacing:3px;line-height:1.1;color:#EDD6C2;white-space:nowrap">LIFE<i>at</i>BRIDGE</p><p style="font-size:24px;letter-spacing:9px;line-height:1.2;color:#EDD6C2;font-weight:500;white-space:nowrap">EVENTS</p></div></div>
+</section>
+
+<section id="passport" style="background:#F7F0E8;color:#2B1A1C;font-family:'DM Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:20px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C8102E;font-weight:600">Foyer, from arrival · Activation 05 · no phones</p>
+<h2 style="font-family:'Cormorant Garamond', Georgia, serif;font-size:64px;font-weight:600;line-height:1.05;width:1664px">The Exposome Passport</h2>
+<div style="display:flex;flex-direction:row;gap:56px;align-items:start">
+<div style="width:960px;display:flex;flex-direction:column;gap:16px">
+<p style="font-size:26px;line-height:1.4;color:#4B3A3D"><b>The idea.</b> At registration, every guest gets a small printed passport instead of a name badge. It has eight stamp boxes, one per station, and staff stamp it as guests go. A full passport earns the bigger goodie bag at the exit.</p>
+<p style="font-size:26px;line-height:1.4;color:#4B3A3D"><b>Why it works.</b> It turns free movement into a treasure hunt, repeats the exposome words on every page, and gives CHOSEN its key number: at the exit we count how many passports have the Exposome Map stamp.</p>
+<div style="background:#4A141C;padding:20px 28px;border-radius:14px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#EDD6C2;font-weight:600">Production required</h3>
+<ul style="font-size:24px;line-height:1.4;color:#EDD6C2"><li>160 printed passports in CHOSEN’s design; 10 custom rubber stamps and ink pads</li><li>Two registration counters, three staff; exit desk shared with the goodie bag team</li><li>Optional: staff tap a counter on a tablet at each station, so the total shows live at the exit</li></ul>
+</div>
+</div>
+<div style="width:648px;background:#FFFFFF;border:2px solid #E4D6CC;border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:14px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C8102E;font-weight:600">Mock-up · fully stamped</p>
+<div style="background:#F7F0E8;border-radius:12px;padding:20px;box-shadow:0 10px 24px rgba(74,20,28,0.15);display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;flex-direction:row;justify-content:space-between;align-items:baseline"><p style="font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#C8102E;font-weight:600">Exposome passport</p><p style="font-size:24px;font-weight:600;color:#4A141C">No. 042</p></div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px">
+<div style="border:3px dashed #E4D6CC;border-radius:10px;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:56px;height:56px;border-radius:50%;border:4px solid #C8102E;display:flex;align-items:center;justify-content:center;transform:rotate(-14deg)" data-anim="stamp" data-i="1"><p style="font-size:24px;font-weight:600;color:#C8102E">1</p></div><p style="font-size:24px;color:#4B3A3D">Map</p></div>
+<div style="border:3px dashed #E4D6CC;border-radius:10px;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:56px;height:56px;border-radius:50%;border:4px solid #C8102E;display:flex;align-items:center;justify-content:center;transform:rotate(-14deg)" data-anim="stamp" data-i="2"><p style="font-size:24px;font-weight:600;color:#C8102E">2</p></div><p style="font-size:24px;color:#4B3A3D">Proof</p></div>
+<div style="border:3px dashed #E4D6CC;border-radius:10px;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:56px;height:56px;border-radius:50%;border:4px solid #C8102E;display:flex;align-items:center;justify-content:center;transform:rotate(-14deg)" data-anim="stamp" data-i="3"><p style="font-size:24px;font-weight:600;color:#C8102E">3</p></div><p style="font-size:24px;color:#4B3A3D">Younger</p></div>
+<div style="border:3px dashed #E4D6CC;border-radius:10px;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:56px;height:56px;border-radius:50%;border:4px solid #C8102E;display:flex;align-items:center;justify-content:center;transform:rotate(-14deg)" data-anim="stamp" data-i="4"><p style="font-size:24px;font-weight:600;color:#C8102E">4</p></div><p style="font-size:24px;color:#4B3A3D">Wall</p></div>
+<div style="border:3px dashed #E4D6CC;border-radius:10px;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:56px;height:56px;border-radius:50%;border:4px solid #C8102E;display:flex;align-items:center;justify-content:center;transform:rotate(-14deg)" data-anim="stamp" data-i="5"><p style="font-size:24px;font-weight:600;color:#C8102E">5</p></div><p style="font-size:24px;color:#4B3A3D">Print</p></div>
+<div style="border:3px dashed #E4D6CC;border-radius:10px;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:56px;height:56px;border-radius:50%;border:4px solid #C8102E;display:flex;align-items:center;justify-content:center;transform:rotate(-14deg)" data-anim="stamp" data-i="6"><p style="font-size:24px;font-weight:600;color:#C8102E">6</p></div><p style="font-size:24px;color:#4B3A3D">Beads</p></div>
+<div style="border:3px dashed #E4D6CC;border-radius:10px;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:56px;height:56px;border-radius:50%;border:4px solid #C8102E;display:flex;align-items:center;justify-content:center;transform:rotate(-14deg)" data-anim="stamp" data-i="7"><p style="font-size:24px;font-weight:600;color:#C8102E">7</p></div><p style="font-size:24px;color:#4B3A3D">Receipt</p></div>
+<div style="border:3px dashed #E4D6CC;border-radius:10px;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:56px;height:56px;border-radius:50%;border:4px solid #C8102E;display:flex;align-items:center;justify-content:center;transform:rotate(-14deg)" data-anim="stamp" data-i="8"><p style="font-size:24px;font-weight:600;color:#C8102E">8</p></div><p style="font-size:24px;color:#4B3A3D">Game</p></div>
+</div>
+</div>
+<p style="font-size:24px;font-weight:600;color:#4A141C;text-align:center">Full passport = bigger goodie bag at the exit</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#8A6F72">Know Your Exposome · Activation proposal · 10</p>
+<div style="position:absolute;right:128px;bottom:28px;width:470px;height:128px;background:#4A141C;border:1px solid #7A3A42;border-radius:12px;padding:14px 26px;display:flex;flex-direction:row;align-items:center;gap:22px"><svg aria-label="LIFEATBRIDGE bridge mark" viewBox="0 0 64 100" style="width:58px;height:90px"><rect x="4" y="4" width="9" height="92" fill="#EDD6C2"/><path d="M13 7 Q60 7 60 29 Q60 50 13 50" fill="none" stroke="#EDD6C2" stroke-width="6"/><path d="M13 50 Q60 50 60 71 Q60 93 13 93" fill="none" stroke="#EDD6C2" stroke-width="6"/><rect x="13" y="17" width="30" height="3" fill="#EDD6C2"/><rect x="13" y="27" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="38" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="60" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="71" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="82" width="30" height="3" fill="#EDD6C2"/></svg><div style="display:flex;flex-direction:column;gap:2px"><p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:42px;font-weight:600;letter-spacing:3px;line-height:1.1;color:#EDD6C2;white-space:nowrap">LIFE<i>at</i>BRIDGE</p><p style="font-size:24px;letter-spacing:9px;line-height:1.2;color:#EDD6C2;font-weight:500;white-space:nowrap">EVENTS</p></div></div>
+</section>
+
+<section id="confessions" style="background:#F7F0E8;color:#2B1A1C;font-family:'DM Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:20px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C8102E;font-weight:600">Foyer, lounge end · Activation 06 · no phones</p>
+<h2 style="font-family:'Cormorant Garamond', Georgia, serif;font-size:64px;font-weight:600;line-height:1.05;width:1664px">The Confession Wall</h2>
+<div style="display:flex;flex-direction:row;gap:56px;align-items:start">
+<div style="width:960px;display:flex;flex-direction:column;gap:16px">
+<p style="font-size:26px;line-height:1.4;color:#4B3A3D"><b>The idea.</b> After the stand-up, the handwritten confession cards are pinned on a four-metre wall, sorted into the same six groups as the Exposome Map: sun, city, screens, sleep, stress, diet. Guests find their own card among 150 others and see that their habit is just one factor, not a judgement.</p>
+<p style="font-size:26px;line-height:1.4;color:#4B3A3D"><b>Why it works.</b> It shows the brief’s message in a physical way: not your fault, your information. A wall of handwriting is the most photographed thing at any event we have built. It stands next to Zone 1, so guests reach the map already thinking in the same six groups.</p>
+<div style="background:#4A141C;padding:20px 28px;border-radius:14px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#EDD6C2;font-weight:600">Production required</h3>
+<ul style="font-size:24px;line-height:1.4;color:#EDD6C2"><li>4m × 2.5m freestanding wall, six printed columns, pin or magnet surface; front lighting for phone photos</li><li>Two staff sort the cards during the stand-up; no names anywhere</li><li>Wall text approved by Dr. Renita</li></ul>
+</div>
+</div>
+<div style="width:648px;background:#FFFFFF;border:2px solid #E4D6CC;border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:14px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C8102E;font-weight:600">Mock-up · six groups</p>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+<div style="background:#F7F0E8;border:2px solid #E4D6CC;border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px"><p style="font-size:24px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#4A141C;text-align:center">Sun</p><div style="background:#FFF8EF;border:1px solid #E4D6CC;border-radius:6px;padding:8px;box-shadow:0 3px 8px rgba(74,20,28,0.12);transform:rotate(-2deg)" data-anim="drop" data-i="1"><p style="font-size:24px;line-height:1.15;color:#4A141C">no SPF in the car</p></div><div style="background:#FFF8EF;border:1px solid #E4D6CC;border-radius:6px;padding:8px;box-shadow:0 3px 8px rgba(74,20,28,0.12);transform:rotate(2deg)" data-anim="drop" data-i="2"><p style="font-size:24px;line-height:1.15;color:#4A141C">reapply? never</p></div></div>
+<div style="background:#F7F0E8;border:2px solid #E4D6CC;border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px"><p style="font-size:24px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#4A141C;text-align:center">City</p><div style="background:#FFF8EF;border:1px solid #E4D6CC;border-radius:6px;padding:8px;box-shadow:0 3px 8px rgba(74,20,28,0.12);transform:rotate(1deg)" data-anim="drop" data-i="3"><p style="font-size:24px;line-height:1.15;color:#4A141C">ORR, windows open</p></div><div style="background:#FFF8EF;border:1px solid #E4D6CC;border-radius:6px;padding:8px;box-shadow:0 3px 8px rgba(74,20,28,0.12);transform:rotate(-2deg)" data-anim="drop" data-i="4"><p style="font-size:24px;line-height:1.15;color:#4A141C">bike, no cover</p></div></div>
+<div style="background:#F7F0E8;border:2px solid #E4D6CC;border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px"><p style="font-size:24px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#4A141C;text-align:center">Screens</p><div style="background:#FFF8EF;border:1px solid #E4D6CC;border-radius:6px;padding:8px;box-shadow:0 3px 8px rgba(74,20,28,0.12);transform:rotate(-2deg)" data-anim="drop" data-i="5"><p style="font-size:24px;line-height:1.15;color:#4A141C">2 a.m. reels</p></div><div style="background:#FFF8EF;border:1px solid #E4D6CC;border-radius:6px;padding:8px;box-shadow:0 3px 8px rgba(74,20,28,0.12);transform:rotate(2deg)" data-anim="drop" data-i="6"><p style="font-size:24px;line-height:1.15;color:#4A141C">phone in bed</p></div></div>
+<div style="background:#F7F0E8;border:2px solid #E4D6CC;border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px"><p style="font-size:24px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#4A141C;text-align:center">Sleep</p><div style="background:#FFF8EF;border:1px solid #E4D6CC;border-radius:6px;padding:8px;box-shadow:0 3px 8px rgba(74,20,28,0.12);transform:rotate(2deg)" data-anim="drop" data-i="7"><p style="font-size:24px;line-height:1.15;color:#4A141C">5 hours, if lucky</p></div><div style="background:#FFF8EF;border:1px solid #E4D6CC;border-radius:6px;padding:8px;box-shadow:0 3px 8px rgba(74,20,28,0.12);transform:rotate(-1deg)" data-anim="drop" data-i="8"><p style="font-size:24px;line-height:1.15;color:#4A141C">pillow face</p></div></div>
+<div style="background:#F7F0E8;border:2px solid #E4D6CC;border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px"><p style="font-size:24px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#4A141C;text-align:center">Stress</p><div style="background:#FFF8EF;border:1px solid #E4D6CC;border-radius:6px;padding:8px;box-shadow:0 3px 8px rgba(74,20,28,0.12);transform:rotate(-2deg)" data-anim="drop" data-i="9"><p style="font-size:24px;line-height:1.15;color:#4A141C">deadline face</p></div><div style="background:#FFF8EF;border:1px solid #E4D6CC;border-radius:6px;padding:8px;box-shadow:0 3px 8px rgba(74,20,28,0.12);transform:rotate(1deg)" data-anim="drop" data-i="10"><p style="font-size:24px;line-height:1.15;color:#4A141C">four coffees</p></div></div>
+<div style="background:#F7F0E8;border:2px solid #E4D6CC;border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px"><p style="font-size:24px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#4A141C;text-align:center">Diet</p><div style="background:#FFF8EF;border:1px solid #E4D6CC;border-radius:6px;padding:8px;box-shadow:0 3px 8px rgba(74,20,28,0.12);transform:rotate(2deg)" data-anim="drop" data-i="11"><p style="font-size:24px;line-height:1.15;color:#4A141C">sugar at 11 pm</p></div><div style="background:#FFF8EF;border:1px solid #E4D6CC;border-radius:6px;padding:8px;box-shadow:0 3px 8px rgba(74,20,28,0.12);transform:rotate(-2deg)" data-anim="drop" data-i="12"><p style="font-size:24px;line-height:1.15;color:#4A141C">water? barely</p></div></div>
+</div>
+<p style="font-size:24px;line-height:1.3;color:#8A6F72;text-align:center">Example cards written by us to show the tone.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#8A6F72">Know Your Exposome · Activation proposal · 11</p>
+<div style="position:absolute;right:128px;bottom:28px;width:470px;height:128px;background:#4A141C;border:1px solid #7A3A42;border-radius:12px;padding:14px 26px;display:flex;flex-direction:row;align-items:center;gap:22px"><svg aria-label="LIFEATBRIDGE bridge mark" viewBox="0 0 64 100" style="width:58px;height:90px"><rect x="4" y="4" width="9" height="92" fill="#EDD6C2"/><path d="M13 7 Q60 7 60 29 Q60 50 13 50" fill="none" stroke="#EDD6C2" stroke-width="6"/><path d="M13 50 Q60 50 60 71 Q60 93 13 93" fill="none" stroke="#EDD6C2" stroke-width="6"/><rect x="13" y="17" width="30" height="3" fill="#EDD6C2"/><rect x="13" y="27" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="38" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="60" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="71" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="82" width="30" height="3" fill="#EDD6C2"/></svg><div style="display:flex;flex-direction:column;gap:2px"><p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:42px;font-weight:600;letter-spacing:3px;line-height:1.1;color:#EDD6C2;white-space:nowrap">LIFE<i>at</i>BRIDGE</p><p style="font-size:24px;letter-spacing:9px;line-height:1.2;color:#EDD6C2;font-weight:500;white-space:nowrap">EVENTS</p></div></div>
+</section>
+
+<section id="sunprints" style="background:#F7F0E8;color:#2B1A1C;font-family:'DM Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:20px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C8102E;font-weight:600">Foyer, glass end · Activation 07 · no phones</p>
+<h2 style="font-family:'Cormorant Garamond', Georgia, serif;font-size:64px;font-weight:600;line-height:1.05;width:1664px">The Print Lab: write your name in sunscreen</h2>
+<div style="display:flex;flex-direction:row;gap:56px;align-items:start">
+<div style="width:960px;display:flex;flex-direction:column;gap:16px">
+<p style="font-size:26px;line-height:1.4;color:#4B3A3D"><b>The idea.</b> Special light-sensitive paper (cyanotype) turns deep blue under UV light. Guests write their name or place a leaf on a sheet, paint over it with CHOSEN sunscreen, and put it in a UV light box for three minutes. After a rinse in water, everything the sunscreen covered stays pale. They take the print home.</p>
+<p style="font-size:26px;line-height:1.4;color:#4B3A3D"><b>Why it works.</b> A simple proof that sunscreen blocks UV, turned into a souvenir. The drying line becomes the most photographed corner of the foyer, and the print tells the brand story without any words.</p>
+<div style="background:#4A141C;padding:20px 28px;border-radius:14px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#EDD6C2;font-weight:600">Production required · checked</h3>
+<ul style="font-size:24px;line-height:1.4;color:#EDD6C2"><li>200 ready-coated A5 sheets ordered now and kept in black bags; two UV light boxes with timers; a full practice run a week before</li><li>A table, two 20-litre water tubs with lids (no plumbing needed), a drying line, gloves and brushes; table kept away from the window</li><li>Two staff; sunscreen from CHOSEN; explanation card approved by Dr. Renita</li></ul>
+</div>
+</div>
+<div style="width:648px;background:#FFFFFF;border:2px solid #E4D6CC;border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;flex-direction:row;justify-content:space-between"><p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C8102E;font-weight:600">Mock-up · after 3 minutes</p><p style="font-size:24px;font-weight:600;color:#8E5BD6">UV light box</p></div>
+<div style="height:24px;border-radius:6px;background:#2B1A1C"></div>
+<div style="background:linear-gradient(180deg, #EFE6FF, #FFFFFF);padding:18px;border-radius:12px;display:flex;flex-direction:column;align-items:center">
+<div data-anim="expose" style="width:420px;background:#1E3F8A;border-radius:6px;box-shadow:0 14px 30px rgba(74,20,28,0.2);padding:30px 24px;display:flex;flex-direction:column;align-items:center;gap:22px">
+<p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:88px;font-weight:500;font-style:italic;color:#F7F0E8;letter-spacing:3px">Priya</p>
+<div style="width:120px;height:58px;background:#F7F0E8;border-radius:58px 0 58px 0;transform:rotate(-20deg)"></div>
+</div>
+</div>
+<p style="font-size:24px;font-weight:600;color:#4A141C;text-align:center">Where the sunscreen went, the paper stays pale.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#8A6F72">Know Your Exposome · Activation proposal · 12</p>
+<div style="position:absolute;right:128px;bottom:28px;width:470px;height:128px;background:#4A141C;border:1px solid #7A3A42;border-radius:12px;padding:14px 26px;display:flex;flex-direction:row;align-items:center;gap:22px"><svg aria-label="LIFEATBRIDGE bridge mark" viewBox="0 0 64 100" style="width:58px;height:90px"><rect x="4" y="4" width="9" height="92" fill="#EDD6C2"/><path d="M13 7 Q60 7 60 29 Q60 50 13 50" fill="none" stroke="#EDD6C2" stroke-width="6"/><path d="M13 50 Q60 50 60 71 Q60 93 13 93" fill="none" stroke="#EDD6C2" stroke-width="6"/><rect x="13" y="17" width="30" height="3" fill="#EDD6C2"/><rect x="13" y="27" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="38" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="60" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="71" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="82" width="30" height="3" fill="#EDD6C2"/></svg><div style="display:flex;flex-direction:column;gap:2px"><p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:42px;font-weight:600;letter-spacing:3px;line-height:1.1;color:#EDD6C2;white-space:nowrap">LIFE<i>at</i>BRIDGE</p><p style="font-size:24px;letter-spacing:9px;line-height:1.2;color:#EDD6C2;font-weight:500;white-space:nowrap">EVENTS</p></div></div>
+</section>
+
+<section id="uvbeads" style="background:#F7F0E8;color:#2B1A1C;font-family:'DM Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:20px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C8102E;font-weight:600">Foyer, glass end · Activation 08 · no phones</p>
+<h2 style="font-family:'Cormorant Garamond', Georgia, serif;font-size:64px;font-weight:600;line-height:1.05;width:1664px">The Bead Lab: car glass, shade, open light</h2>
+<div style="display:flex;flex-direction:row;gap:56px;align-items:start">
+<div style="width:960px;display:flex;flex-direction:column;gap:16px">
+<p style="font-size:26px;line-height:1.4;color:#4B3A3D"><b>The idea.</b> The white bracelet from the envelope changes colour in UV light. Guests make a second bracelet and hold it under a UV lamp in three ways: behind a piece of car window glass, behind shade net, and in the open. Then they rub sunscreen on half the beads and try again.</p>
+<p style="font-size:26px;line-height:1.4;color:#4B3A3D"><b>Why it works.</b> The beads change colour even behind car glass. That ends the “I’m in the car, I don’t need sunscreen” excuse in three seconds. Guests leave with two bracelets and a story.</p>
+<div style="background:#4A141C;padding:20px 28px;border-radius:14px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#EDD6C2;font-weight:600">Production required · checked</h3>
+<ul style="font-size:24px;line-height:1.4;color:#EDD6C2"><li>3,000 UV colour-changing beads and elastic cord (standard craft items), bowls, a table; one UV lamp on a stand</li><li>Three small frames: a piece of car window glass, a shade net, and an empty one</li><li>Two staff; sunscreen from CHOSEN; a short explanation card approved by Dr. Renita</li></ul>
+</div>
+</div>
+<div style="width:648px;background:#FFFFFF;border:2px solid #E4D6CC;border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:14px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C8102E;font-weight:600">Mock-up · same beads, three tests</p>
+<div style="height:20px;border-radius:6px;background:#2B1A1C"></div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+<div style="background:#F7F0E8;border:2px solid #E4D6CC;border-radius:10px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:8px"><p style="font-size:24px;font-weight:600;color:#4A141C;text-align:center">Car glass</p><div style="display:flex;flex-direction:row;gap:5px"><div style="width:24px;height:24px;border-radius:50%;background:#8E5BD6" data-anim="bead" data-i="1"></div><div style="width:24px;height:24px;border-radius:50%;background:#8E5BD6" data-anim="bead" data-i="2"></div><div style="width:24px;height:24px;border-radius:50%;background:#8E5BD6" data-anim="bead" data-i="3"></div><div style="width:24px;height:24px;border-radius:50%;background:#8E5BD6" data-anim="bead" data-i="4"></div><div style="width:24px;height:24px;border-radius:50%;background:#8E5BD6" data-anim="bead" data-i="5"></div></div><p style="font-size:24px;line-height:1.2;color:#4B3A3D;text-align:center">Still changes. Glass lets UV through.</p></div>
+<div style="background:#F7F0E8;border:2px solid #E4D6CC;border-radius:10px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:8px"><p style="font-size:24px;font-weight:600;color:#4A141C;text-align:center">Shade mesh</p><div style="display:flex;flex-direction:row;gap:5px"><div style="width:24px;height:24px;border-radius:50%;background:#DCCBF0" data-anim="bead" data-i="6"></div><div style="width:24px;height:24px;border-radius:50%;background:#DCCBF0" data-anim="bead" data-i="7"></div><div style="width:24px;height:24px;border-radius:50%;background:#DCCBF0" data-anim="bead" data-i="8"></div><div style="width:24px;height:24px;border-radius:50%;background:#DCCBF0" data-anim="bead" data-i="9"></div><div style="width:24px;height:24px;border-radius:50%;background:#DCCBF0" data-anim="bead" data-i="10"></div></div><p style="font-size:24px;line-height:1.2;color:#4B3A3D;text-align:center">Fainter, not gone.</p></div>
+<div style="background:#F7F0E8;border:2px solid #E4D6CC;border-radius:10px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:8px"><p style="font-size:24px;font-weight:600;color:#4A141C;text-align:center">Open</p><div style="display:flex;flex-direction:row;gap:5px"><div style="width:24px;height:24px;border-radius:50%;background:#5B2A9E" data-anim="bead" data-i="11"></div><div style="width:24px;height:24px;border-radius:50%;background:#5B2A9E" data-anim="bead" data-i="12"></div><div style="width:24px;height:24px;border-radius:50%;background:#5B2A9E" data-anim="bead" data-i="13"></div><div style="width:24px;height:24px;border-radius:50%;background:#5B2A9E" data-anim="bead" data-i="14"></div><div style="width:24px;height:24px;border-radius:50%;background:#5B2A9E" data-anim="bead" data-i="15"></div></div><p style="font-size:24px;line-height:1.2;color:#4B3A3D;text-align:center">Full violet in seconds.</p></div>
+</div>
+<div style="background:#4A141C;border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;font-weight:600;color:#EDD6C2">Half with sunscreen, half without</p>
+<div style="display:flex;flex-direction:row;gap:8px"><div style="width:24px;height:24px;border-radius:50%;background:#FFFFFF;border:2px solid #EDD6C2"></div><div style="width:24px;height:24px;border-radius:50%;background:#FFFFFF;border:2px solid #EDD6C2"></div><div style="width:24px;height:24px;border-radius:50%;background:#FFFFFF;border:2px solid #EDD6C2"></div><div style="width:24px;height:24px;border-radius:50%;background:#FFFFFF;border:2px solid #EDD6C2"></div><div style="width:24px;height:24px;border-radius:50%;background:#5B2A9E;border:2px solid #EDD6C2" data-anim="bead" data-i="16"></div><div style="width:24px;height:24px;border-radius:50%;background:#5B2A9E;border:2px solid #EDD6C2" data-anim="bead" data-i="17"></div><div style="width:24px;height:24px;border-radius:50%;background:#5B2A9E;border:2px solid #EDD6C2" data-anim="bead" data-i="18"></div><div style="width:24px;height:24px;border-radius:50%;background:#5B2A9E;border:2px solid #EDD6C2" data-anim="bead" data-i="19"></div></div>
+<p style="font-size:24px;color:#EDD6C2">Left: protected, stays pale. Right: unprotected, turns violet.</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#8A6F72">Know Your Exposome · Activation proposal · 13</p>
+<div style="position:absolute;right:128px;bottom:28px;width:470px;height:128px;background:#4A141C;border:1px solid #7A3A42;border-radius:12px;padding:14px 26px;display:flex;flex-direction:row;align-items:center;gap:22px"><svg aria-label="LIFEATBRIDGE bridge mark" viewBox="0 0 64 100" style="width:58px;height:90px"><rect x="4" y="4" width="9" height="92" fill="#EDD6C2"/><path d="M13 7 Q60 7 60 29 Q60 50 13 50" fill="none" stroke="#EDD6C2" stroke-width="6"/><path d="M13 50 Q60 50 60 71 Q60 93 13 93" fill="none" stroke="#EDD6C2" stroke-width="6"/><rect x="13" y="17" width="30" height="3" fill="#EDD6C2"/><rect x="13" y="27" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="38" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="60" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="71" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="82" width="30" height="3" fill="#EDD6C2"/></svg><div style="display:flex;flex-direction:column;gap:2px"><p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:42px;font-weight:600;letter-spacing:3px;line-height:1.1;color:#EDD6C2;white-space:nowrap">LIFE<i>at</i>BRIDGE</p><p style="font-size:24px;letter-spacing:9px;line-height:1.2;color:#EDD6C2;font-weight:500;white-space:nowrap">EVENTS</p></div></div>
+</section>
+
+<section id="weatherboard" style="background:#F7F0E8;color:#2B1A1C;font-family:'DM Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:20px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C8102E;font-weight:600">Foyer, glass end · Activation 09 · one button, no phones</p>
+<h2 style="font-family:'Cormorant Garamond', Georgia, serif;font-size:64px;font-weight:600;line-height:1.05;width:1664px">Today’s Exposome, live, on a receipt</h2>
+<div style="display:flex;flex-direction:row;gap:56px;align-items:start">
+<div style="width:960px;display:flex;flex-direction:column;gap:16px">
+<p style="font-size:26px;line-height:1.4;color:#4B3A3D"><b>The idea.</b> A screen by the glass wall shows today’s live numbers for Domlur: UV index, air pollution (PM2.5), humidity and hours of daylight, from public weather data. Guests press a big button and a receipt printer gives them a “bill” for what their skin faced today. The last line says “Paid in full. CHOSEN.”</p>
+<p style="font-size:26px;line-height:1.4;color:#4B3A3D"><b>Why it works.</b> The exposome stops being an idea and becomes real numbers for this city, right now. A receipt is cheap, fits in a pocket, and people love to share it.</p>
+<div style="background:#4A141C;padding:20px 28px;border-radius:14px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#EDD6C2;font-weight:600">Production required · built in-house</h3>
+<ul style="font-size:24px;line-height:1.4;color:#EDD6C2"><li>The display is a web page we build; one laptop runs a 55-inch screen and a receipt printer; a big arcade button prints the receipt</li><li>4G router with the laptop; the last reading is saved in case the data feed drops; 200 branded receipts</li><li>Receipt wording approved by Dr. Renita</li></ul>
+</div>
+</div>
+<div style="width:648px;background:#FFFFFF;border:2px solid #E4D6CC;border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:14px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C8102E;font-weight:600">Mock-up · screen and receipt</p>
+<div style="display:flex;flex-direction:row;gap:16px;align-items:start">
+<div style="flex:1;background:#4A141C;border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:2px">
+<p style="font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#C98A8F;font-weight:600">Domlur · live</p>
+<div style="display:flex;flex-direction:row;justify-content:space-between;align-items:baseline;border-bottom:1px solid #6B2731;padding:8px 0"><p style="font-size:24px;font-weight:600;color:#EDD6C2">UV index</p><p style="font-size:30px;font-weight:600;color:#FFFFFF">[__]</p></div>
+<div style="display:flex;flex-direction:row;justify-content:space-between;align-items:baseline;border-bottom:1px solid #6B2731;padding:8px 0"><p style="font-size:24px;font-weight:600;color:#EDD6C2">PM2.5</p><p style="font-size:30px;font-weight:600;color:#FFFFFF">[__]</p></div>
+<div style="display:flex;flex-direction:row;justify-content:space-between;align-items:baseline;border-bottom:1px solid #6B2731;padding:8px 0"><p style="font-size:24px;font-weight:600;color:#EDD6C2">Humidity</p><p style="font-size:30px;font-weight:600;color:#FFFFFF">[__]%</p></div>
+<div style="display:flex;flex-direction:row;justify-content:space-between;align-items:baseline;padding:8px 0"><p style="font-size:24px;font-weight:600;color:#EDD6C2">Daylight</p><p style="font-size:30px;font-weight:600;color:#FFFFFF">[__] h</p></div>
+</div>
+<div data-anim="print" style="width:230px;background:#FFFFFF;border:1px solid #E4D6CC;box-shadow:0 8px 20px rgba(74,20,28,0.15);padding:14px;display:flex;flex-direction:column;gap:4px;font-family:'Courier New', monospace">
+<p style="font-size:24px;font-weight:600;text-align:center;color:#2B1A1C">SKIN BILL</p>
+<p style="font-size:24px;text-align:center;color:#2B1A1C">31 OCT · BLR</p>
+<hr style="border-top:1px dashed #C9B6A6">
+<div style="display:flex;flex-direction:row;justify-content:space-between"><p style="font-size:24px;color:#2B1A1C">UV</p><p style="font-size:24px;color:#2B1A1C">[__]</p></div>
+<div style="display:flex;flex-direction:row;justify-content:space-between"><p style="font-size:24px;color:#2B1A1C">PM2.5</p><p style="font-size:24px;color:#2B1A1C">[__]</p></div>
+<div style="display:flex;flex-direction:row;justify-content:space-between"><p style="font-size:24px;color:#2B1A1C">Daylight</p><p style="font-size:24px;color:#2B1A1C">[__]</p></div>
+<hr style="border-top:1px dashed #C9B6A6">
+<p style="font-size:24px;font-weight:600;text-align:center;color:#2B1A1C">PAID IN FULL.<br>CHOSEN.</p>
+</div>
+</div>
+<p style="font-size:24px;color:#8A6F72;text-align:center">Values are live on the day; nothing is pre-printed.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#8A6F72">Know Your Exposome · Activation proposal · 14</p>
+<div style="position:absolute;right:128px;bottom:28px;width:470px;height:128px;background:#4A141C;border:1px solid #7A3A42;border-radius:12px;padding:14px 26px;display:flex;flex-direction:row;align-items:center;gap:22px"><svg aria-label="LIFEATBRIDGE bridge mark" viewBox="0 0 64 100" style="width:58px;height:90px"><rect x="4" y="4" width="9" height="92" fill="#EDD6C2"/><path d="M13 7 Q60 7 60 29 Q60 50 13 50" fill="none" stroke="#EDD6C2" stroke-width="6"/><path d="M13 50 Q60 50 60 71 Q60 93 13 93" fill="none" stroke="#EDD6C2" stroke-width="6"/><rect x="13" y="17" width="30" height="3" fill="#EDD6C2"/><rect x="13" y="27" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="38" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="60" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="71" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="82" width="30" height="3" fill="#EDD6C2"/></svg><div style="display:flex;flex-direction:column;gap:2px"><p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:42px;font-weight:600;letter-spacing:3px;line-height:1.1;color:#EDD6C2;white-space:nowrap">LIFE<i>at</i>BRIDGE</p><p style="font-size:24px;letter-spacing:9px;line-height:1.2;color:#EDD6C2;font-weight:500;white-space:nowrap">EVENTS</p></div></div>
+</section>
+
+<section id="boardgame" style="background:#F7F0E8;color:#2B1A1C;font-family:'DM Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:20px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C8102E;font-weight:600">Foyer, glass end · Activation 10 · no phones</p>
+<h2 style="font-family:'Cormorant Garamond', Georgia, serif;font-size:64px;font-weight:600;line-height:1.05;width:1664px">A Day in Bengaluru: the floor game</h2>
+<div style="display:flex;flex-direction:row;gap:56px;align-items:start">
+<div style="width:960px;display:flex;flex-direction:column;gap:16px">
+<p style="font-size:26px;line-height:1.4;color:#4B3A3D"><b>The idea.</b> A 4 m × 4 m snakes-and-ladders board printed on the foyer floor. Every square is a moment in a Bengaluru day: “Window down on the ORR: go back three.” “Reapplied sunscreen at 2 p.m.: go up five.” Teams of four, a giant foam dice, a host with a mic, six minutes per game.</p>
+<p style="font-size:26px;line-height:1.4;color:#4B3A3D"><b>Why it works.</b> The snakes are the things that damage skin. The ladders are CHOSEN’s four-step routine. Nobody is judged on their own habits, so it is loud and fun without being personal.</p>
+<div style="background:#4A141C;padding:20px 28px;border-radius:14px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#EDD6C2;font-weight:600">Production required</h3>
+<ul style="font-size:24px;line-height:1.4;color:#EDD6C2"><li>4 m × 4 m removable, non-slip floor sticker in brand colours, approved by BIC for their stone floor; two giant foam dice; team sashes</li><li>A host with a mic and a small speaker, kept quiet; one helper on the floor</li><li>36 square texts written with CHOSEN and approved by Dr. Renita; the winning team gets a prize from CHOSEN</li></ul>
+</div>
+</div>
+<div style="width:648px;background:#FFFFFF;border:2px solid #E4D6CC;border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:14px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C8102E;font-weight:600">Mock-up · ladders up, snakes down</p>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;gap:5px">
+<div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">31</p></div><div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">32</p></div><div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">33</p></div><div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">34</p></div><div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">35</p></div><div style="height:54px;background:#4A141C;border:2px solid #4A141C;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#EDD6C2">36</p></div>
+<div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">30</p></div><div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">29</p></div><div style="height:54px;background:#EDE6F5;border:2px solid #8E5BD6;border-radius:5px;padding:2px 6px;display:flex;align-items:end" data-anim="late"><p style="font-size:24px;font-weight:600;color:#8E5BD6">28 ↓</p></div><div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">27</p></div><div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">26</p></div><div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">25</p></div>
+<div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">19</p></div><div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">20</p></div><div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">21</p></div><div style="height:54px;background:#FBE3E7;border:2px solid #C8102E;border-radius:5px;padding:2px 6px;display:flex;align-items:end;justify-content:space-between" data-anim="late"><p style="font-size:24px;font-weight:600;color:#C8102E">22</p><div style="width:26px;height:26px;border-radius:50%;background:#C8102E;border:3px solid #FFFFFF"></div data-anim="token" data-i="1"></div><div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">23</p></div><div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">24</p></div>
+<div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">18</p></div><div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">17</p></div><div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">16</p></div><div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">15</p></div><div style="height:54px;background:#EDE6F5;border:2px solid #8E5BD6;border-radius:5px;padding:2px 6px;display:flex;align-items:end" data-anim="late"><p style="font-size:24px;font-weight:600;color:#8E5BD6">14 ↓</p></div><div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">13</p></div>
+<div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">7</p></div><div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">8</p></div><div style="height:54px;background:#EDE6F5;border:2px solid #8E5BD6;border-radius:5px;padding:2px 6px;display:flex;align-items:end;justify-content:space-between" data-anim="late"><p style="font-size:24px;font-weight:600;color:#8E5BD6">9 ↓</p><div style="width:26px;height:26px;border-radius:50%;background:#4A141C;border:3px solid #FFFFFF"></div data-anim="token" data-i="2"></div><div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">10</p></div><div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">11</p></div><div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">12</p></div>
+<div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">1</p></div><div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">2</p></div><div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">3</p></div><div style="height:54px;background:#FBE3E7;border:2px solid #C8102E;border-radius:5px;padding:2px 6px;display:flex;align-items:end" data-anim="late"><p style="font-size:24px;font-weight:600;color:#C8102E">4 ↑</p></div><div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">5</p></div><div style="height:54px;background:#F7F0E8;border:2px solid #E4D6CC;border-radius:5px;padding:2px 6px;display:flex;align-items:end"><p style="font-size:24px;font-weight:600;color:#C9B6A6">6</p></div>
+</div>
+<p style="font-size:24px;line-height:1.3;color:#4A141C;text-align:center"><b>Red ↑</b> “Reapplied SPF at 2 p.m.”: 4 to 22. <b>Violet ↓</b> “Window down on the ORR”: back three.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#8A6F72">Know Your Exposome · Activation proposal · 15</p>
+<div style="position:absolute;right:128px;bottom:28px;width:470px;height:128px;background:#4A141C;border:1px solid #7A3A42;border-radius:12px;padding:14px 26px;display:flex;flex-direction:row;align-items:center;gap:22px"><svg aria-label="LIFEATBRIDGE bridge mark" viewBox="0 0 64 100" style="width:58px;height:90px"><rect x="4" y="4" width="9" height="92" fill="#EDD6C2"/><path d="M13 7 Q60 7 60 29 Q60 50 13 50" fill="none" stroke="#EDD6C2" stroke-width="6"/><path d="M13 50 Q60 50 60 71 Q60 93 13 93" fill="none" stroke="#EDD6C2" stroke-width="6"/><rect x="13" y="17" width="30" height="3" fill="#EDD6C2"/><rect x="13" y="27" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="38" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="60" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="71" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="82" width="30" height="3" fill="#EDD6C2"/></svg><div style="display:flex;flex-direction:column;gap:2px"><p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:42px;font-weight:600;letter-spacing:3px;line-height:1.1;color:#EDD6C2;white-space:nowrap">LIFE<i>at</i>BRIDGE</p><p style="font-size:24px;letter-spacing:9px;line-height:1.2;color:#EDD6C2;font-weight:500;white-space:nowrap">EVENTS</p></div></div>
+</section>
+
+<section id="creatorstudio" style="background:#F7F0E8;color:#2B1A1C;font-family:'DM Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:20px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C8102E;font-weight:600">Foyer, glass end · Activation 11 · phones welcome here</p>
+<h2 style="font-family:'Cormorant Garamond', Georgia, serif;font-size:64px;font-weight:600;line-height:1.05;width:1664px">The Content Lab</h2>
+<div style="display:flex;flex-direction:row;gap:56px;align-items:start">
+<div style="width:960px;display:flex;flex-direction:column;gap:16px">
+<p style="font-size:26px;line-height:1.4;color:#4B3A3D"><b>The idea.</b> A small, well-lit studio with three sets, where any guest, not only the 30 creators, can make a social post in two minutes: a teleprompter set for “the exposome in 15 seconds”, a lab table for product photos, and a mirror set with flattering light.</p>
+<p style="font-size:26px;line-height:1.4;color:#4B3A3D"><b>Why it works.</b> The brief wants social content that explains the science, not just pictures of the venue. The teleprompter gives guests the right words, in their own voice. The window light and the trees outside make a good backdrop.</p>
+<div style="background:#4A141C;padding:20px 28px;border-radius:14px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#EDD6C2;font-weight:600">Production required</h3>
+<ul style="font-size:24px;line-height:1.4;color:#EDD6C2"><li>Three small sets with printed backdrops; two studio lights, two ring lights, a tablet teleprompter with approved scripts</li><li>A creator coordinator and a make-up touch-up artist; props and product from CHOSEN</li><li>Same-day photo desk: the photographer’s first photos shared before guests leave</li></ul>
+</div>
+</div>
+<div style="width:648px;background:#FFFFFF;border:2px solid #E4D6CC;border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:14px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C8102E;font-weight:600">Mock-up · teleprompter set</p>
+<div style="display:flex;flex-direction:row;gap:18px;align-items:center;justify-content:center">
+<div style="width:90px;height:90px;border-radius:50%;border:14px solid #FFF3DF;box-shadow:0 0 24px #FFE7C2" data-anim="ring" data-i="1"></div>
+<div style="width:330px;background:#2B1A1C;border-radius:28px;padding:12px;display:flex;flex-direction:column">
+<div style="background:#4A141C;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;flex-direction:row;gap:8px;align-items:center"><div style="width:14px;height:14px;border-radius:50%;background:#C8102E" data-anim="blink"></div><p style="font-size:24px;font-weight:600;color:#FFFFFF">REC 0:09</p></div>
+<p style="font-size:24px;line-height:1.3;font-weight:600;color:#EDD6C2">Okay, new word. Exposome. Everything around me that is ageing my skin: the sun, the traffic, my phone at 2 a.m. I can’t change the air. I can change the outcome. I have CHOSEN what to do about it.</p>
+<p style="font-size:24px;font-weight:600;color:#C98A8F">#KnowYourExposome</p>
+</div>
+</div>
+<div style="width:90px;height:90px;border-radius:50%;border:14px solid #FFF3DF;box-shadow:0 0 24px #FFE7C2" data-anim="ring" data-i="2"></div>
+</div>
+<p style="font-size:24px;line-height:1.3;color:#8A6F72;text-align:center">Script built from lines in CHOSEN’s brief; final wording approved by Dr. Renita.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#8A6F72">Know Your Exposome · Activation proposal · 16</p>
+<div style="position:absolute;right:128px;bottom:28px;width:470px;height:128px;background:#4A141C;border:1px solid #7A3A42;border-radius:12px;padding:14px 26px;display:flex;flex-direction:row;align-items:center;gap:22px"><svg aria-label="LIFEATBRIDGE bridge mark" viewBox="0 0 64 100" style="width:58px;height:90px"><rect x="4" y="4" width="9" height="92" fill="#EDD6C2"/><path d="M13 7 Q60 7 60 29 Q60 50 13 50" fill="none" stroke="#EDD6C2" stroke-width="6"/><path d="M13 50 Q60 50 60 71 Q60 93 13 93" fill="none" stroke="#EDD6C2" stroke-width="6"/><rect x="13" y="17" width="30" height="3" fill="#EDD6C2"/><rect x="13" y="27" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="38" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="60" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="71" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="82" width="30" height="3" fill="#EDD6C2"/></svg><div style="display:flex;flex-direction:column;gap:2px"><p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:42px;font-weight:600;letter-spacing:3px;line-height:1.1;color:#EDD6C2;white-space:nowrap">LIFE<i>at</i>BRIDGE</p><p style="font-size:24px;letter-spacing:9px;line-height:1.2;color:#EDD6C2;font-weight:500;white-space:nowrap">EVENTS</p></div></div>
+</section>
+
+<section id="uvcamera" style="background:#4A141C;color:#EDD6C2;font-family:'DM Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:20px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C98A8F;font-weight:600">Foyer, blackout booth · Activation 12 · optional, quoted separately as the brief asks</p>
+<h2 style="font-family:'Cormorant Garamond', Georgia, serif;font-size:64px;font-weight:600;line-height:1.05;width:1664px;color:#EDD6C2">The Sunscreen Selfie</h2>
+<div style="display:flex;flex-direction:row;gap:56px;align-items:start">
+<div style="width:960px;display:flex;flex-direction:column;gap:16px">
+<p style="font-size:26px;line-height:1.4;color:#EDD6C2"><b>The idea.</b> Under a UV camera, sunscreen looks black. Guests take a “before” photo, apply CHOSEN sunscreen the way they normally do, and take an “after” photo. The spots they missed, usually ears, hairline and eyelids, are the lesson. They get a printed before-and-after card to keep.</p>
+<p style="font-size:26px;line-height:1.4;color:#EDD6C2"><b>Why it works.</b> The brief already says skin imaging will be the most popular item. We agree. We give it its own dark booth in the middle of the foyer, so it does not add to the Proof Bench queue.</p>
+<div style="background:#F7F0E8;padding:20px 28px;border-radius:14px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#C8102E;font-weight:600">Production required · depends on rental</h3>
+<ul style="font-size:24px;line-height:1.4;color:#2B1A1C"><li>A rented UV camera with its lights and a monitor; an operator; we confirm availability before CHOSEN decides</li><li>A 3 m × 3 m dark booth with a queue rope; cotton pads, mirrors, product from CHOSEN. Alternative: BIC’s Green Room 1, which already has mirrors, with a helper guiding guests</li><li>Instant card printer; a consent tick-box on the card for guests happy for it to be posted</li></ul>
+</div>
+</div>
+<div style="width:648px;background:#1A0509;border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:14px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C98A8F;font-weight:600">Mock-up · before and after under UV</p>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+<div style="background:#3A1016;border-radius:12px;padding:20px 16px 14px;display:flex;flex-direction:column;align-items:center;gap:12px">
+<div style="display:flex;flex-direction:row;align-items:center;gap:4px"><div style="width:26px;height:50px;border-radius:50%;background:#8E7F86"></div><div style="width:150px;height:196px;border-radius:50% 50% 46% 46%;background:#8E7F86"></div><div style="width:26px;height:50px;border-radius:50%;background:#8E7F86"></div></div>
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;color:#EDD6C2">BEFORE</p>
+</div>
+<div style="background:#3A1016;border-radius:12px;padding:20px 16px 14px;display:flex;flex-direction:column;align-items:center;gap:12px">
+<div style="display:flex;flex-direction:row;align-items:center;gap:4px"><div style="width:26px;height:50px;border-radius:50%;background:#8E7F86;border:3px dashed #FFD166"></div data-anim="late" data-i="1"><div data-anim="darken" style="width:150px;height:196px;border-radius:50% 50% 46% 46%;background:#2A2126;border-top:12px solid #8E7F86;display:flex;flex-direction:row;justify-content:center;gap:10px;padding:52px 0 0"><div style="width:30px;height:20px;border-radius:50%;border:3px dashed #FFD166"></div data-anim="late" data-i="2"><div style="width:30px;height:20px;border-radius:50%;border:3px dashed #FFD166"></div data-anim="late" data-i="3"></div><div style="width:26px;height:50px;border-radius:50%;background:#8E7F86;border:3px dashed #FFD166"></div data-anim="late" data-i="4"></div>
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;color:#EDD6C2">AFTER · dark = protected</p>
+</div>
+</div>
+<p style="font-size:24px;line-height:1.3;color:#C98A8F;text-align:center">Dashed yellow marks the spots most people miss: hairline, eyelids, ears.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#C98A8F">Know Your Exposome · Activation proposal · 17</p>
+<div style="position:absolute;right:128px;bottom:28px;width:470px;height:128px;background:#4A141C;border:1px solid #7A3A42;border-radius:12px;padding:14px 26px;display:flex;flex-direction:row;align-items:center;gap:22px"><svg aria-label="LIFEATBRIDGE bridge mark" viewBox="0 0 64 100" style="width:58px;height:90px"><rect x="4" y="4" width="9" height="92" fill="#EDD6C2"/><path d="M13 7 Q60 7 60 29 Q60 50 13 50" fill="none" stroke="#EDD6C2" stroke-width="6"/><path d="M13 50 Q60 50 60 71 Q60 93 13 93" fill="none" stroke="#EDD6C2" stroke-width="6"/><rect x="13" y="17" width="30" height="3" fill="#EDD6C2"/><rect x="13" y="27" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="38" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="60" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="71" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="82" width="30" height="3" fill="#EDD6C2"/></svg><div style="display:flex;flex-direction:column;gap:2px"><p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:42px;font-weight:600;letter-spacing:3px;line-height:1.1;color:#EDD6C2;white-space:nowrap">LIFE<i>at</i>BRIDGE</p><p style="font-size:24px;letter-spacing:9px;line-height:1.2;color:#EDD6C2;font-weight:500;white-space:nowrap">EVENTS</p></div></div>
+</section>
+
+<section id="webapp" style="background:#F7F0E8;color:#2B1A1C;font-family:'DM Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C8102E;font-weight:600">Back of house · the web layer</p>
+<h2 style="font-family:'Cormorant Garamond', Georgia, serif;font-size:64px;font-weight:600;line-height:1.05;width:1664px">Four simple web pages we build ourselves. Guests use only one.</h2>
+<p style="font-size:26px;line-height:1.4;color:#4B3A3D;width:1600px">No software licences, no app to install. Each page is one simple screen built and hosted by LIFEATBRIDGE, tested on BIC’s Wi-Fi and a 4G router before the day, and run from one laptop. Only the vote uses guests’ phones. The rest are display screens and staff tools.</p>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:20px" data-stagger>
+<div style="background:#4A141C;padding:26px;border-radius:14px;display:flex;flex-direction:column;gap:10px">
+<p style="font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#C98A8F;font-weight:600">Guest-facing · 5 minutes</p>
+<h3 style="font-size:30px;font-weight:600;color:#EDD6C2">Fact or Fiction vote</h3>
+<p style="font-size:24px;line-height:1.4;color:#EDD6C2">QR code on the big screen, two buttons on the phone, live results on screen. Paper paddle in the envelope as backup.</p>
+</div>
+<div style="background:#FFFFFF;border:1px solid #E4D6CC;padding:26px;border-radius:14px;display:flex;flex-direction:column;gap:10px">
+<p style="font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#C8102E;font-weight:600">Screen only</p>
+<h3 style="font-size:30px;font-weight:600;color:#4A141C">Live exposome dashboard</h3>
+<p style="font-size:24px;line-height:1.4;color:#4B3A3D">Domlur UV index, pollution, humidity and daylight from public data; the same page prints the receipt when the button is pressed.</p>
+</div>
+<div style="background:#FFFFFF;border:1px solid #E4D6CC;padding:26px;border-radius:14px;display:flex;flex-direction:column;gap:10px">
+<p style="font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#C8102E;font-weight:600">Staff only</p>
+<h3 style="font-size:30px;font-weight:600;color:#4A141C">Station counter</h3>
+<p style="font-size:24px;line-height:1.4;color:#4B3A3D">Staff tap once per stamp on a tablet at each station. The number of guests who completed the Exposome Map (the brief’s 80% target) shows live at the exit.</p>
+</div>
+<div style="background:#FFFFFF;border:1px solid #E4D6CC;padding:26px;border-radius:14px;display:flex;flex-direction:column;gap:10px">
+<p style="font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#C8102E;font-weight:600">Screen only</p>
+<h3 style="font-size:30px;font-weight:600;color:#4A141C">Show screens</h3>
+<p style="font-size:24px;line-height:1.4;color:#4B3A3D">The welcome slide, the vote results and the stand-up title card on the big screen, all from the same laptop, so there is no switching between sources during the show.</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;gap:20px;align-items:center;background:#EDD6C2;padding:20px 28px;border-radius:12px">
+<svg viewBox="0 0 24 24" style="width:36px;height:36px;flex:none" aria-label="check"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#C8102E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<p style="font-size:24px;line-height:1.35;color:#4A141C">We can show CHOSEN a working vote page and dashboard on a call before the costed proposal, and test them live at BIC during the site visit.</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#8A6F72">Know Your Exposome · Activation proposal · 18</p>
+<div style="position:absolute;right:128px;bottom:28px;width:470px;height:128px;background:#4A141C;border:1px solid #7A3A42;border-radius:12px;padding:14px 26px;display:flex;flex-direction:row;align-items:center;gap:22px"><svg aria-label="LIFEATBRIDGE bridge mark" viewBox="0 0 64 100" style="width:58px;height:90px"><rect x="4" y="4" width="9" height="92" fill="#EDD6C2"/><path d="M13 7 Q60 7 60 29 Q60 50 13 50" fill="none" stroke="#EDD6C2" stroke-width="6"/><path d="M13 50 Q60 50 60 71 Q60 93 13 93" fill="none" stroke="#EDD6C2" stroke-width="6"/><rect x="13" y="17" width="30" height="3" fill="#EDD6C2"/><rect x="13" y="27" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="38" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="60" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="71" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="82" width="30" height="3" fill="#EDD6C2"/></svg><div style="display:flex;flex-direction:column;gap:2px"><p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:42px;font-weight:600;letter-spacing:3px;line-height:1.1;color:#EDD6C2;white-space:nowrap">LIFE<i>at</i>BRIDGE</p><p style="font-size:24px;letter-spacing:9px;line-height:1.2;color:#EDD6C2;font-weight:500;white-space:nowrap">EVENTS</p></div></div>
+</section>
+
+<section id="zones" style="background:#F7F0E8;color:#2B1A1C;font-family:'DM Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:24px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C8102E;font-weight:600">How it fits together</p>
+<h2 style="font-family:'Cormorant Garamond', Georgia, serif;font-size:64px;font-weight:600;line-height:1.05;width:1664px">CHOSEN’s three zones stay as planned. Our activities fit around them.</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px" data-stagger>
+<div style="background:#4A141C;border-radius:16px;padding:28px 32px;display:flex;flex-direction:column;gap:14px">
+<h3 style="font-size:30px;font-weight:600;color:#EDD6C2">Inside the auditorium · 11:30 to 12:40 · seated</h3>
+<p style="font-size:24px;line-height:1.4;color:#C98A8F">From the brief: welcome address, moderated panel, Q&amp;A on two roving mics.</p>
+<ul style="font-size:24px;line-height:1.5;color:#EDD6C2"><li>01 The envelope and the lights-down reveal</li><li>02 Exposome Bingo, on paper, during the panel</li><li>03 Fact or Fiction live vote, the one phone moment</li><li>04 EXPOSED stand-up with Dr. Renita’s fact-check</li></ul>
+</div>
+<div style="background:#FFFFFF;border:1px solid #E4D6CC;border-radius:16px;padding:28px 32px;display:flex;flex-direction:column;gap:14px">
+<h3 style="font-size:30px;font-weight:600;color:#4A141C">Outside in the foyer · 12:40 to 14:30 · free movement</h3>
+<p style="font-size:24px;line-height:1.4;color:#8A6F72">From the brief: registration, Zone 1 Exposome Map, Zone 2 Proof Bench, Zone 3 Younger Room, food and drinks served by staff, goodie bag at the exit.</p>
+<ul style="font-size:24px;line-height:1.5;color:#4B3A3D"><li>05 Exposome Passport, issued at arrival, checked at the exit</li><li>06 Confession Wall, beside Zone 1 at the lounge end</li><li>07 Print Lab · 08 Bead Lab · 09 Live receipt · 10 Floor game, at the glass end</li><li>11 Content Lab, at the glass end · 12 Sunscreen Selfie, optional</li></ul>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px">
+<div style="background:#FFFFFF;border:1px solid #E4D6CC;border-left:6px solid #C8102E;padding:18px 22px;border-radius:12px;display:flex;flex-direction:column;gap:4px">
+<h3 style="font-size:26px;font-weight:600;color:#4A141C">The target gets measured</h3>
+<p style="font-size:24px;line-height:1.35;color:#4B3A3D">Zone 1 is passport stamp one. The exit check tells CHOSEN exactly how many guests left with a map.</p>
+</div>
+<div style="background:#FFFFFF;border:1px solid #E4D6CC;border-left:6px solid #C8102E;padding:18px 22px;border-radius:12px;display:flex;flex-direction:column;gap:4px">
+<h3 style="font-size:26px;font-weight:600;color:#4A141C">The queue gets managed</h3>
+<p style="font-size:24px;line-height:1.35;color:#4B3A3D">Red-seal envelopes and bingo winners get Younger Room skip-the-queue passes, which spreads out the queue the brief warns about.</p>
+</div>
+<div style="background:#FFFFFF;border:1px solid #E4D6CC;border-left:6px solid #C8102E;padding:18px 22px;border-radius:12px;display:flex;flex-direction:column;gap:4px">
+<h3 style="font-size:26px;font-weight:600;color:#4A141C">The key words repeat</h3>
+<p style="font-size:24px;line-height:1.35;color:#4B3A3D">The map’s six groups organise the Confession Wall. The Proof Bench’s four steps become the floor game’s ladders.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#8A6F72">Know Your Exposome · Activation proposal · 19</p>
+<div style="position:absolute;right:128px;bottom:28px;width:470px;height:128px;background:#4A141C;border:1px solid #7A3A42;border-radius:12px;padding:14px 26px;display:flex;flex-direction:row;align-items:center;gap:22px"><svg aria-label="LIFEATBRIDGE bridge mark" viewBox="0 0 64 100" style="width:58px;height:90px"><rect x="4" y="4" width="9" height="92" fill="#EDD6C2"/><path d="M13 7 Q60 7 60 29 Q60 50 13 50" fill="none" stroke="#EDD6C2" stroke-width="6"/><path d="M13 50 Q60 50 60 71 Q60 93 13 93" fill="none" stroke="#EDD6C2" stroke-width="6"/><rect x="13" y="17" width="30" height="3" fill="#EDD6C2"/><rect x="13" y="27" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="38" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="60" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="71" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="82" width="30" height="3" fill="#EDD6C2"/></svg><div style="display:flex;flex-direction:column;gap:2px"><p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:42px;font-weight:600;letter-spacing:3px;line-height:1.1;color:#EDD6C2;white-space:nowrap">LIFE<i>at</i>BRIDGE</p><p style="font-size:24px;letter-spacing:9px;line-height:1.2;color:#EDD6C2;font-weight:500;white-space:nowrap">EVENTS</p></div></div>
+</section>
+
+<section id="runofshow" style="background:#F7F0E8;color:#2B1A1C;font-family:'DM Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<p style="font-size:24px;letter-spacing:4px;text-transform:uppercase;color:#C8102E;font-weight:600">Run of show · Saturday 31 October 2026</p>
+<h2 style="font-family:'Cormorant Garamond', Georgia, serif;font-size:72px;font-weight:600;line-height:1.05;width:1600px">The brief’s timeline, with our activities added</h2>
+<table style="font-size:24px;color:#2B1A1C;border:1px solid #E4D6CC;border-radius:12px;background:#FFFFFF">
+<tr style="background:#4A141C"><th style="width:14%;text-align:left;color:#EDD6C2;padding:12px 18px">Time</th><th style="width:30%;text-align:left;color:#EDD6C2">Programme (per brief)</th><th style="width:14%;text-align:left;color:#EDD6C2">Where</th><th style="width:42%;text-align:left;color:#EDD6C2">Our activities</th></tr>
+<tr><td style="font-weight:600">11:00–11:30</td><td>Walk-in, registration, welcome drink</td><td>Foyer</td><td>Passport issued; envelopes already on every seat</td></tr>
+<tr style="background:#FBF6F0"><td style="font-weight:600">11:30–11:40</td><td>Welcome address, Dr. Renita Rajan</td><td>Auditorium</td><td>Envelopes opened; UV reveal thirty seconds in</td></tr>
+<tr><td style="font-weight:600">11:40–11:45</td><td style="color:#C8102E;font-weight:600">New: Fact or Fiction live vote</td><td>Auditorium</td><td>Five statements, our vote page on the big screen; paper paddles as backup</td></tr>
+<tr style="background:#FBF6F0"><td style="font-weight:600">11:45–12:15</td><td>Panel: the latest in exposome science</td><td>Auditorium</td><td>Exposome Bingo running; three winners</td></tr>
+<tr><td style="font-weight:600">12:15–12:25</td><td>Q&amp;A from the floor, two roving mics</td><td>Auditorium</td><td>Confession cards collected by runners</td></tr>
+<tr style="background:#FBF6F0"><td style="font-weight:600">12:25–12:40</td><td style="color:#C8102E;font-weight:600">New: EXPOSED stand-up with fact-check</td><td>Auditorium</td><td>Comedian on stage, Dr. Renita on the buzzer</td></tr>
+<tr><td style="font-weight:600">12:40–14:30</td><td>Zones open, passed food and drink</td><td>Foyer</td><td>All stations open; Confession Wall up from 12:45; same-day photos from 13:30</td></tr>
+<tr style="background:#FBF6F0"><td style="font-weight:600">14:30</td><td>Soft close</td><td>Foyer exit</td><td>Passport check, goodie bag handed over</td></tr>
+</table>
+<p style="font-size:24px;line-height:1.4;color:#4B3A3D;width:1600px">Changes to the brief’s timing: the panel runs 30 minutes instead of 35, the Q&amp;A 10 instead of 15, and the zones open at 12:40 instead of 12:30. If CHOSEN prefers the original timings, the stand-up can open the day at 11:30 as a warm-up before the welcome.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#8A6F72">Know Your Exposome · Activation proposal · 20</p>
+<div style="position:absolute;right:128px;bottom:28px;width:470px;height:128px;background:#4A141C;border:1px solid #7A3A42;border-radius:12px;padding:14px 26px;display:flex;flex-direction:row;align-items:center;gap:22px"><svg aria-label="LIFEATBRIDGE bridge mark" viewBox="0 0 64 100" style="width:58px;height:90px"><rect x="4" y="4" width="9" height="92" fill="#EDD6C2"/><path d="M13 7 Q60 7 60 29 Q60 50 13 50" fill="none" stroke="#EDD6C2" stroke-width="6"/><path d="M13 50 Q60 50 60 71 Q60 93 13 93" fill="none" stroke="#EDD6C2" stroke-width="6"/><rect x="13" y="17" width="30" height="3" fill="#EDD6C2"/><rect x="13" y="27" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="38" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="60" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="71" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="82" width="30" height="3" fill="#EDD6C2"/></svg><div style="display:flex;flex-direction:column;gap:2px"><p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:42px;font-weight:600;letter-spacing:3px;line-height:1.1;color:#EDD6C2;white-space:nowrap">LIFE<i>at</i>BRIDGE</p><p style="font-size:24px;letter-spacing:9px;line-height:1.2;color:#EDD6C2;font-weight:500;white-space:nowrap">EVENTS</p></div></div>
+</section>
+
+<section id="production" style="background:#F7F0E8;color:#2B1A1C;font-family:'DM Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:20px">
+<h2 style="font-family:'Cormorant Garamond', Georgia, serif;font-size:64px;font-weight:600;line-height:1.05;width:1664px">Production at a glance</h2>
+<table style="font-size:24px;color:#2B1A1C;border:1px solid #E4D6CC;border-radius:12px;background:#FFFFFF">
+<tr style="background:#4A141C"><th style="width:24%;text-align:left;color:#EDD6C2;padding:9px 16px">Activation</th><th style="width:30%;text-align:left;color:#EDD6C2">Key build or print</th><th style="width:22%;text-align:left;color:#EDD6C2">Tech</th><th style="width:8%;text-align:left;color:#EDD6C2">Staff</th><th style="width:16%;text-align:left;color:#EDD6C2">Lead time</th></tr>
+<tr><td style="font-weight:600">01 Envelope + reveal</td><td>160 UV-ink envelopes, bracelets, cards</td><td>8–12 rented UV lights on BIC’s rig</td><td>4 pre-doors</td><td>10 days</td></tr>
+<tr style="background:#FBF6F0"><td style="font-weight:600">02 Bingo</td><td>160 cards, six layouts, pencils</td><td>Roving mic</td><td>2 runners</td><td>7 days print</td></tr>
+<tr><td style="font-weight:600">03 Live vote</td><td>Paddles in envelope as fallback</td><td>Our vote page, 4G router</td><td>1 operator</td><td>5 days, then test</td></tr>
+<tr style="background:#FBF6F0"><td style="font-weight:600">04 Stand-up</td><td>Stool, buzzer, lighting state</td><td>BIC mic, two cameras</td><td>2 runners</td><td>Book talent now</td></tr>
+<tr><td style="font-weight:600">05 Passport</td><td>160 passports, 10 stamps</td><td>Optional counter tablet</td><td>3</td><td>7 days print</td></tr>
+<tr style="background:#FBF6F0"><td style="font-weight:600">06 Confession Wall</td><td>4m × 2.5m printed wall, pins</td><td>Front lighting</td><td>2 curators</td><td>10 days build</td></tr>
+<tr><td style="font-weight:600">07 Print Lab</td><td>200 cyanotype sheets, bench, tubs, line</td><td>Two UV light boxes</td><td>2</td><td>Order sheets now</td></tr>
+<tr style="background:#FBF6F0"><td style="font-weight:600">08 Bead Lab</td><td>3,000 beads, three frames, bench</td><td>One UV lamp</td><td>1</td><td>7 days</td></tr>
+<tr><td style="font-weight:600">09 Live receipt</td><td>Branded roll, arcade button</td><td>Our web display, screen, printer</td><td>1</td><td>7 days</td></tr>
+<tr style="background:#FBF6F0"><td style="font-weight:600">10 Floor game</td><td>4m × 4m floor vinyl, foam dice</td><td>Small speaker, mic</td><td>2</td><td>7 days print</td></tr>
+<tr><td style="font-weight:600">11 Content Lab</td><td>Three small sets, backdrops</td><td>Studio and ring lights, teleprompter</td><td>3</td><td>10 days build</td></tr>
+<tr style="background:#FBF6F0"><td style="font-weight:600">12 Sunscreen Selfie (opt.)</td><td>3m × 3m blackout booth</td><td>Rented UV camera</td><td>1 operator</td><td>Rental to confirm</td></tr>
+</table>
+<p style="font-size:24px;line-height:1.4;color:#8A6F72;width:1600px">Staff counts are on top of the registration, floor, food and creator teams in the brief. Each item is a separate line in the costed proposal, so activities can be added or removed one by one.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;letter-spacing:3px;text-transform:uppercase;color:#8A6F72">Know Your Exposome · Activation proposal · 21</p>
+<div style="position:absolute;right:128px;bottom:28px;width:470px;height:128px;background:#4A141C;border:1px solid #7A3A42;border-radius:12px;padding:14px 26px;display:flex;flex-direction:row;align-items:center;gap:22px"><svg aria-label="LIFEATBRIDGE bridge mark" viewBox="0 0 64 100" style="width:58px;height:90px"><rect x="4" y="4" width="9" height="92" fill="#EDD6C2"/><path d="M13 7 Q60 7 60 29 Q60 50 13 50" fill="none" stroke="#EDD6C2" stroke-width="6"/><path d="M13 50 Q60 50 60 71 Q60 93 13 93" fill="none" stroke="#EDD6C2" stroke-width="6"/><rect x="13" y="17" width="30" height="3" fill="#EDD6C2"/><rect x="13" y="27" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="38" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="60" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="71" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="82" width="30" height="3" fill="#EDD6C2"/></svg><div style="display:flex;flex-direction:column;gap:2px"><p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:42px;font-weight:600;letter-spacing:3px;line-height:1.1;color:#EDD6C2;white-space:nowrap">LIFE<i>at</i>BRIDGE</p><p style="font-size:24px;letter-spacing:9px;line-height:1.2;color:#EDD6C2;font-weight:500;white-space:nowrap">EVENTS</p></div></div>
+</section>
+
+<section id="needs" style="display:flex; flex-direction:column; gap:32px; padding:128px 128px 160px; background:#f7f0e8">
+  <p style="font-family:'DM Sans', Arial, sans-serif; font-size:24px; font-weight:600; letter-spacing:4px; text-transform:uppercase; color:#c8102e">To lock this in · 18 days to show</p>
+  <h2 style="width:1600px; font-family:'Cormorant Garamond', Georgia, serif; font-size:72px; font-weight:600; line-height:1.05; color:#2b1a1c">What we need from CHOSEN, and when</h2>
+  <div style="display:grid; gap:20px; grid-template-columns:1fr 1fr 1fr 1fr">
+    <div style="display:flex; flex-direction:column; gap:12px; padding:28px; background:#4a141c; border-radius:16px">
+      <p style="font-family:'DM Sans', Arial, sans-serif; font-size:24px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:#c98a8f">By Fri 16 Oct</p>
+      <h3 style="font-family:'DM Sans', Arial, sans-serif; font-size:30px; font-weight:600; line-height:1.2; color:#edd6c2">Decisions</h3>
+      <ul style="font-family:'DM Sans', Arial, sans-serif; font-size:24px; line-height:1.45; color:#edd6c2">
+        <li>Choose activities from this deck</li>
+        <li>Stand-up slot: 12:25 or 11:30 warm-up</li>
+        <li>Sunscreen Selfie: yes or no</li>
+        <li>Upgraded goodie bag tier</li>
+        <li>Attendee split confirmed</li>
+      </ul>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px; padding:28px; background:#ffffff; border:1px solid #e4d6cc; border-radius:16px">
+      <p style="font-family:'DM Sans', Arial, sans-serif; font-size:24px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:#c8102e">By Tue 20 Oct</p>
+      <h3 style="font-family:'DM Sans', Arial, sans-serif; font-size:30px; font-weight:600; line-height:1.2; color:#4a141c">Sign-offs, Dr. Renita</h3>
+      <ul style="font-family:'DM Sans', Arial, sans-serif; font-size:24px; line-height:1.45; color:#4b3a3d">
+        <li>Bingo word list</li>
+        <li>Five vote statements and verdicts</li>
+        <li>Demo cards for both labs and the receipt</li>
+        <li>36 floor-game squares</li>
+        <li>Stand-up guardrails and teleprompter scripts</li>
+      </ul>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px; padding:28px; background:#ffffff; border:1px solid #e4d6cc; border-radius:16px">
+      <p style="font-family:'DM Sans', Arial, sans-serif; font-size:24px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:#c8102e">By Fri 23 Oct</p>
+      <h3 style="font-family:'DM Sans', Arial, sans-serif; font-size:30px; font-weight:600; line-height:1.2; color:#4a141c">Supplies</h3>
+      <ul style="font-family:'DM Sans', Arial, sans-serif; font-size:24px; line-height:1.45; color:#4b3a3d">
+        <li>Brand guidelines and event key visual</li>
+        <li>Product for the labs, Content Lab props</li>
+        <li>Prizes: bingo, floor game, fast-passes</li>
+        <li>Creator list for the Content Lab brief</li>
+      </ul>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px; padding:28px; background:#ffffff; border:1px solid #e4d6cc; border-radius:16px">
+      <p style="font-family:'DM Sans', Arial, sans-serif; font-size:24px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:#c8102e">From LIFEATBRIDGE</p>
+      <h3 style="font-family:'DM Sans', Arial, sans-serif; font-size:30px; font-weight:600; line-height:1.2; color:#4a141c">Our next deliverables</h3>
+      <ul style="font-family:'DM Sans', Arial, sans-serif; font-size:24px; line-height:1.45; color:#4b3a3d">
+        <li>Costed proposal, by zone, activations as separate lines</li>
+        <li>Three comedian options with clips</li>
+        <li>Zone design concepts, three treatments each</li>
+        <li>Production timeline back from 31 Oct</li>
+      </ul>
+    </div>
+  </div>
+  <p style="position:absolute; bottom:64px; left:128px; width:900px; font-family:'DM Sans', Arial, sans-serif; font-size:24px; letter-spacing:3px; text-transform:uppercase; color:#8a6f72">Know Your Exposome · Activation proposal · 22</p>
+  <div style="position:absolute; right:128px; bottom:28px; width:470px; height:128px; display:flex; flex-direction:row; gap:22px; align-items:center; padding:14px 26px; background:#4a141c; border:1px solid #7a3a42; border-radius:12px">
+    <svg xmlns="http://www.w3.org/2000/svg" aria-label="LIFEATBRIDGE bridge mark" viewBox="0 0 64 100" style="width:58px; height:90px"><rect x="4" y="4" width="9" height="92" fill="#EDD6C2"/><path d="M13 7 Q60 7 60 29 Q60 50 13 50" fill="none" stroke="#EDD6C2" stroke-width="6"/><path d="M13 50 Q60 50 60 71 Q60 93 13 93" fill="none" stroke="#EDD6C2" stroke-width="6"/><rect x="13" y="17" width="30" height="3" fill="#EDD6C2"/><rect x="13" y="27" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="38" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="60" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="71" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="82" width="30" height="3" fill="#EDD6C2"/></svg>
+    <div style="display:flex; flex-direction:column; gap:2px">
+      <p style="font-family:'Cormorant Garamond', Georgia, serif; font-size:42px; font-weight:600; line-height:1.1; letter-spacing:3px; white-space:nowrap; color:#edd6c2">LIFE<i>at</i>BRIDGE</p>
+      <p style="font-family:'DM Sans', Arial, sans-serif; font-size:24px; font-weight:500; line-height:1.2; letter-spacing:9px; white-space:nowrap; color:#edd6c2">EVENTS</p>
+    </div>
+  </div>
+  </section>
+
+<section id="close" style="background:#4A141C;color:#EDD6C2;font-family:'DM Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:space-between">
+<div style="display:flex;flex-direction:row;align-items:center;gap:32px"><svg aria-label="LIFEATBRIDGE bridge mark" viewBox="0 0 64 100" style="width:122px;height:190px"><rect x="4" y="4" width="9" height="92" fill="#EDD6C2"/><path d="M13 7 Q60 7 60 29 Q60 50 13 50" fill="none" stroke="#EDD6C2" stroke-width="6"/><path d="M13 50 Q60 50 60 71 Q60 93 13 93" fill="none" stroke="#EDD6C2" stroke-width="6"/><rect x="13" y="17" width="30" height="3" fill="#EDD6C2"/><rect x="13" y="27" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="38" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="60" width="38" height="3" fill="#EDD6C2"/><rect x="13" y="71" width="40" height="3" fill="#EDD6C2"/><rect x="13" y="82" width="30" height="3" fill="#EDD6C2"/></svg><div style="display:flex;flex-direction:column;gap:6px"><p style="font-family:'Cormorant Garamond', Georgia, serif;font-size:72px;font-weight:600;letter-spacing:5px;line-height:1.1;color:#EDD6C2;white-space:nowrap">LIFE<i>at</i>BRIDGE</p><p style="font-size:30px;letter-spacing:14px;line-height:1.2;color:#EDD6C2;font-weight:500;white-space:nowrap">EVENTS</p></div></div>
+<div style="display:flex;flex-direction:column;gap:20px">
+<h2 style="font-family:'Cormorant Garamond', Georgia, serif;font-size:120px;font-weight:600;line-height:1;color:#EDD6C2;width:1500px">You cannot change the air.<br>You can change the afternoon.</h2>
+<p style="font-size:28px;line-height:1.4;color:#C98A8F;width:1200px">Know Your Exposome · CHOSEN by Dermatology · 31 October 2026 · Bangalore International Centre</p>
+<p style="font-size:28px;line-height:1.4;color:#EDD6C2">LIFEATBRIDGE EVENTS · lifeatbridge@gmail.com</p>
+</div>
+</section>
+
+</div></div>
+<div class="tap" id="prev" title="Previous"></div>
+<div class="tap" id="next" title="Next"></div>
+<div id="bar"><i></i></div>
+<div id="hint">← → to move · F for fullscreen</div>
+<div id="hud"></div>
+<div id="notes"></div>
+<script>
+(function(){
+  var NOTES = ["Open by stating the purpose of this deck: CHOSEN already has a strong event brief with three zones. This deck answers one specific ask — what engagement activations LIFEATBRIDGE would add so the afternoon is not the usual launch format. Every activation slide carries its production requirement, so CHOSEN can pick and cost them individually. Mention upfront that the mock-up panels illustrate the mechanic, not final creative.", "Play back the brief in one breath so CHOSEN knows we built on it rather than around it. The three zones, the panel and the goodie bag are theirs; what follows is the engagement layer that sits on top. Stress the number that matters: the exposome map in hand. Every activation we propose either drives a guest towards that map or gives them a reason to talk about it afterwards.", "These five tests are the filter we used to discard the obvious ideas: photo walls with a hashtag, product displays, a DJ. If an idea did not teach something about the exposome, could not be done quickly by 150 people, or left nothing to photograph, it is not in this deck. Point out test four in particular: the exposome is a list of things that sound like blame, and a game that scores people on bad sleep or smoking would undo CHOSEN’s tone. Our hosts and copy are briefed on this.", "Everything happens on the first floor: the auditorium, which we enter from the rear at console level, and the foyer outside it. The auditorium figures come from BIC’s own spec sheet, and they matter for two of our activations: the house rig and console carry the UV reveal without a separate truss, and the cyclorama gives the live vote a six-and-a-half-metre screen. The foyer carries everything else, so the layout discipline is to keep CHOSEN’s three zones and the goodie bag at the lounge end near the exit, and push our lab-style stations towards the glass wall, which spreads 150 people along the full length of the floor.", "Walk the route left to right. The brief asks that guests move freely and that signage makes the flow obvious without anyone being told. The passport does that job better than signage: a guest with three empty stamp slots goes looking for the activations they have missed. Stop four is CHOSEN’s own three-zone design from the brief; we are not replacing it, we are surrounding it. Stop five is our lab corner at the glass end of the same foyer, and splitting the two ends is how we keep 150 people from standing in one cluster for two hours.", "This is the opening moment and the one to lead with if CHOSEN picks only one thing from the auditorium block. The envelope and the reveal are one activation because the envelope is the reveal: the UV-ink line is printed on it, so the object in every guest’s hands is what lights up. Feasibility is good: UV-reactive ink is a standard screen-print option, UV-A LED bars are stock hire items, BIC’s own light bars and ETC console carry them, and the auditorium has no windows. The two things we test on the site visit are the blackout and a sample envelope under the hired fixture. The bracelet is a seed for the Bead Lab later; the confession card is a seed for the stand-up.", "Paper on purpose: a phone-based bingo would pull eyes down during the panel, and a pencil does not. The words on the mock-up are indicative; the real list comes from Dr. Renita so every term is one CHOSEN actually wants in circulation. The panel is not scripted to hit words, but panellists know the list exists, which is usually enough. Three winners spaced across the panel keeps the energy up without interrupting the discussion for more than ninety seconds in total. If the word “Exposed” survives as an alternate event name, the call-out doubles as a brand line.", "This is the only activation in the auditorium that asks for a phone, and it lasts five minutes. We build the vote page ourselves, a single screen with two buttons, so there is no platform licence and we can test it on BIC’s Wi-Fi before the day; the paddle in the envelope is the fallback if connectivity fails, and the host simply reads the room. The statement on the mock-up is a placeholder and the percentages are invented; we do not write the science. The vote sits between Dr. Renita’s welcome and the panel, which is why the run of show moves the panel start by five minutes.", "CHOSEN asked for stand-up connected to the brand, and the risk with brand comedy is that it becomes an advert with a microphone. The buzzer format solves that: the comedian is free to be funny about the audience’s habits, and the brand enters only through the dermatologist’s corrections, which is exactly the authority CHOSEN wants to own. Using the room’s own confession cards makes the set specific to the 150 people in front of it, which no other event can copy. The guardrails in the writer session matter: no product jokes, no mocking anyone’s skin, nothing that contradicts the panel. Three comedian options with sample clips follow once CHOSEN confirms the slot.", "This is the spine of the foyer and the cheapest item in the deck: print and rubber stamps. The eight slots are CHOSEN’s three zones plus five of ours; the set adjusts to whichever activations CHOSEN approves. It stays physical because an object in the hand is what gets photographed and kept, and because guests should not be looking at a phone to know where to go next. The only digital element is optional and staff-side: a tally tapped at each station so the Exposome Map completion number is visible live at the exit, which is the 80 percent figure CHOSEN wants to report. The upgraded goodie bag tier can be as small as one extra product.", "The wall closes the loop the envelope opened. A guest wrote a confession at 11:35 without knowing why; by 12:45 it is on a wall, grouped with others under the same spoke, and a comedian has already made the room laugh about it. The sorting into spokes is deliberate: it uses the same six categories as Zone 1, so the wall sits at the lounge end beside the Exposome Map. Production is simple and in-house: a printed freestanding wall and pins. The earlier idea of a live typed feed on a screen is dropped as unnecessary; the handwriting is the point.", "This is the bench with the most moving parts, so the production line names the feasibility answers: pre-coated sheets are a stock art-supply item and must be ordered this week; the UV exposure box is a small hire or a build; rinsing uses lidded tubs, so BIC’s foyer floor and plumbing are not touched; and we run the whole thing end to end a week before, because cyanotype exposure times vary with the lamp. Cyanotype reacts to UV, which is exactly what sunscreen blocks, so the demonstration is honest without any SPF claim; the demo card wording is Dr. Renita’s. It runs like a bakery: drop a sheet, visit the bead bench, come back and rinse.", "The bead lab is the cheapest bench in the foyer and the one guests talk about afterwards, because it answers a question almost everyone has asked: do I need sunscreen in the car, at the office window, under a tree. UV-reactive beads respond to UV-A, which passes through ordinary window glass, so the car-glass frame is the moment of surprise. Everything on the bench is a stock item, which is why it carries no feasibility risk. The half-and-half strand is the sunscreen demonstration. The explanatory card is short and is written with Dr. Renita so the science claim is hers; our job is the lamp, the three frames and the flow.", "The numbers on the mock-up are blank on purpose: they will be whatever Bengaluru is doing at that minute on 31 October, pulled from public weather and air-quality feeds, and we will not print a figure we have not measured. This is the station that shows what our web capability is for: the dashboard is a page we build, the receipt is that page printed to a thermal printer, and the guest touches nothing but a button. It pairs with the Exposome Map from Zone 1: the map is the guest’s personal exposome, the receipt is the city’s contribution to it on the day.", "This is the energy anchor for the glass end of the foyer and the one creators will film from the side, with the trees behind. The design decision that keeps it on brand is that squares describe situations, never people: a guest lands on “window down on the ORR”, they do not confess to it. The ladders are where CHOSEN’s four-step regime from the Proof Bench appears again: protect outside, protect inside, rebuild outside, rebuild inside, each as a ladder. Four metres square leaves a spectator edge and keeps the lab benches clear. The vinyl is a removable, residue-free film, which we clear with BIC in advance for their stone floor.", "The teleprompter script in the mock-up is assembled from lines already in CHOSEN’s brief, including the wall copy and the photo closing line, so nothing new has been claimed; the final scripts still go through Dr. Renita. The reason to open the lab to all 150 guests and not only the creators is volume: the brief’s second objective is a quantity of content carrying the science, and 80 community members with a good light and a script will out-post 30 creators left to their own devices. The same-day stills desk is the brief’s own ask and it lives here so creators collect their photos on the way out.", "This is the one activation CHOSEN has already asked about, so we present it as a placement and a flow rather than a new idea, and we are honest that it is the only item with a supplier dependency: UV imaging cameras are a specialist rental and we confirm availability before CHOSEN has to decide. The booth is one-at-a-time and will queue, which is why it sits midway along the foyer. The green-room option is worth raising with BIC because it is already a dark, mirrored room, but it means routing guests across the stage ramp. The consent line on the card matters because this is a photo of someone’s face with visible missed patches; it is theirs to post, never ours.", "This slide exists to answer the feasibility question before it is asked. Everything digital in the deck is a plain web page we control: no vendor, no licence, no account for guests to create. That is also why we can be disciplined about phones. The vote is the only guest-facing page and it lasts five minutes; the dashboard and the show screens are things people look at, and the tally is a staff tool that turns the brief’s single metric into a live number instead of a count done after the event. Offer the demo call: a working vote page and dashboard are the fastest way to make the whole proposal feel real.", "This slide is for the CHOSEN team member who worries that twelve new ideas will crowd out the three zones they have already designed. Nothing in the brief moves: the zones, the goodie bag and the panel are where the brief put them. Four of ours happen while everyone is seated, so they take no floor space at all; the rest are spread along the foyer with CHOSEN’s builds at the lounge end and our benches at the glass end. The three cards at the bottom are the integration points to stress, especially the first, because it turns the brief’s only metric from an estimate into a count. The two alternate Younger Room treatments the brief requests come with the zone design concepts, not in this deck.", "The brief is precise about timings and about silence during the panel, so we have kept both. The only cost of the auditorium block is twenty minutes: five for the vote and fifteen for the stand-up, found by trimming the panel and the Q&A slightly and opening the zones ten minutes later. The free-flow still runs an hour and fifty minutes, which is enough for 150 guests to clear twelve stations at under three minutes each. The warm-up alternative is real: a comedian before the welcome loosens the room, but it loses the confession-card material, which is the funniest part. Our recommendation is the 12:25 slot.", "This is the slide CHOSEN’s producer will photograph. Three things to say over it. First, most of the table is print and simple build, which is our own capacity; the lead times are honest and need the shortlist agreed this week. Second, the two items with an outside dependency are the comedian, where the clock is talent availability, and the UV camera, which is a specialist rental, so both are flagged. Third, the web pages carry no licence and are tested before the day, with a paper fallback for the only guest-facing one.", "End on the clock. Eighteen days is workable for everything in this deck, but only if the four decisions in the first column come back by Friday, because the print items need a week and the builds need ten days. The sign-off column is the one that protects CHOSEN: nothing in this deck says anything about skin that Dr. Renita has not approved, and the brief is explicit that nothing goes to print without her. Our own list mirrors what the brief asked the agency for, so CHOSEN can see this deck is one deliverable of four, not a replacement for the costed proposal.", "Close by returning to the brief’s own wall copy, “You cannot change the air. You can change the outcome,” and the promise we are making against it: the afternoon is ours to shape, and every activation in this deck exists so that a guest walks out holding their map, wearing a violet bracelet, carrying a print and a receipt, and knowing one new word. Ask for the Friday decisions and offer the site visit date."];
+  var deck=document.getElementById('deck'), slides=[].slice.call(deck.querySelectorAll('section'));
+  var n=slides.length, cur=-1, bar=document.querySelector('#bar i'), hud=document.getElementById('hud'), notes=document.getElementById('notes');
+  if(/presenter/.test(location.search)) document.body.classList.add('presenter');
+  slides.forEach(function(s){ s.querySelectorAll('[data-stagger]').forEach(function(g){ [].forEach.call(g.children,function(c,k){ c.style.setProperty('--k',k); }); });
+    s.querySelectorAll('[data-i]').forEach(function(e){ e.style.setProperty('--i', e.getAttribute('data-i')); }); });
+  function fit(){ var st=document.getElementById('stage'); var w=st.clientWidth, h=st.clientHeight; var sc=Math.min(w/1920,h/1080); deck.style.transform='scale('+sc+')'; }
+  function show(i, push){ i=Math.max(0,Math.min(n-1,i)); if(i===cur) return;
+    if(cur>=0){ slides[cur].classList.remove('active'); }
+    cur=i; var s=slides[i]; s.classList.add('active');
+    // restart animations
+    s.querySelectorAll('[data-anim],[data-stagger]>*').forEach(function(e){ e.style.animation='none'; void e.offsetWidth; e.style.animation=''; });
+    bar.style.width=((i+1)/n*100)+'%'; hud.textContent=(i+1)+' / '+n; notes.textContent=NOTES[i]||'';
+    if(push!==false) history.replaceState(null,'','#'+(i+1));
+  }
+  function start(){ var h=parseInt(location.hash.slice(1),10); show(isNaN(h)?0:h-1,false); }
+  document.getElementById('next').onclick=function(){show(cur+1)};
+  document.getElementById('prev').onclick=function(){show(cur-1)};
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' '||e.key==='PageDown'||e.key==='Enter'){e.preventDefault();show(cur+1);}
+    else if(e.key==='ArrowLeft'||e.key==='ArrowUp'||e.key==='PageUp'||e.key==='Backspace'){e.preventDefault();show(cur-1);}
+    else if(e.key==='Home'){show(0)} else if(e.key==='End'){show(n-1)}
+    else if(e.key==='f'||e.key==='F'){ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen(); }
+    else if(e.key==='n'||e.key==='N'){ document.body.classList.toggle('presenter'); fit(); }
+    document.getElementById('hint').classList.add('hide');
+  });
+  var tx=null; document.addEventListener('touchstart',function(e){tx=e.touches[0].clientX},{passive:true});
+  document.addEventListener('touchend',function(e){ if(tx===null) return; var dx=e.changedTouches[0].clientX-tx; if(Math.abs(dx)>50) show(dx<0?cur+1:cur-1); tx=null; });
+  window.addEventListener('resize',fit); window.addEventListener('hashchange',start);
+  fit(); start(); setTimeout(function(){document.getElementById('hint').classList.add('hide')},6000);
+})();
+</script>
+</body>
+</html>
