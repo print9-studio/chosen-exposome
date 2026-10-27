@@ -18,7 +18,7 @@ h1{font:600 7vmin/1.05 Georgia,serif;margin:1.5vmin 0 0;text-align:center}
 .tile .v{font:600 6.5vmin/1.1 Georgia,serif;margin:.8vmin 0}
 .tile .b{display:inline-block;font-size:1.9vmin;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.5vmin 1.4vmin;border-radius:99px;background:var(--cream);color:var(--mar)}
 .tile .b.hi{background:var(--red);color:#fff}
-#buzz{width:34vmin;height:34vmin;border-radius:50%;border:1.6vmin solid #7a0a1c;background:radial-gradient(circle at 38% 32%,#ff5a6e 0%,#d3132f 45%,#9c0b22 100%);box-shadow:0 2.4vmin 0 #5a0613,0 4vmin 6vmin rgba(0,0,0,.55);color:#fff;font:700 3.4vmin/1.15 Arial,sans-serif;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:transform .08s,box-shadow .08s}
+#buzz{flex:none;width:34vmin;height:34vmin;border-radius:50%;border:1.6vmin solid #7a0a1c;background:radial-gradient(circle at 38% 32%,#ff5a6e 0%,#d3132f 45%,#9c0b22 100%);box-shadow:0 2.4vmin 0 #5a0613,0 4vmin 6vmin rgba(0,0,0,.55);color:#fff;font:700 3.4vmin/1.15 Arial,sans-serif;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:transform .08s,box-shadow .08s}
 #buzz:active,#buzz.down{transform:translateY(1.8vmin);box-shadow:0 .6vmin 0 #5a0613,0 2vmin 3vmin rgba(0,0,0,.5)}
 #buzz[disabled]{filter:saturate(.4) brightness(.8)}
 .hint{font-size:2.3vmin;color:#C98A8F;text-align:center}
@@ -28,10 +28,24 @@ h1{font:600 7vmin/1.05 Georgia,serif;margin:1.5vmin 0 0;text-align:center}
 #done .big{font:600 7vmin Georgia,serif}#done .sm{font-size:2.6vmin;color:#C98A8F;margin-top:2vmin}
 .paper{width:22vmin;height:0;background:#fff;margin-top:4vmin;border-radius:.5vmin;animation:feed 2.6s ease-out forwards}
 @keyframes feed{to{height:26vmin}}
-@media (orientation:portrait){.tiles{grid-template-columns:repeat(2,1fr)}#buzz{width:44vmin;height:44vmin}h1{font-size:8vmin}}
+body.port #screen{padding:4vh 6vw 7vh;justify-content:space-between;gap:2.5vh}
+body.port .logo{height:5vh}
+body.port h1{font-size:8.6vw;margin-top:1.5vh}
+body.port .sub{font-size:2.4vw;letter-spacing:.1em}
+body.port .tiles{grid-template-columns:repeat(2,1fr);gap:3vw;width:100%}
+body.port .tile{padding:3.2vw 2vw;border-radius:3vw}
+body.port .tile .k{font-size:3vw}
+body.port .tile .v{font-size:10vw;margin:1.2vw 0}
+body.port .tile .b{font-size:2.8vw;padding:.8vw 2.4vw}
+body.port #buzz{width:50vw;height:50vw;margin-bottom:2vh;font-size:5.4vw;border-width:2.4vw;box-shadow:0 3.4vw 0 #5a0613,0 6vw 9vw rgba(0,0,0,.55)}
+body.port #buzz:active,body.port #buzz.down{transform:translateY(2.6vw);box-shadow:0 .8vw 0 #5a0613,0 3vw 4vw rgba(0,0,0,.5)}
+body.port .hint{font-size:3.6vw}body.port .status{font-size:2.3vw}
+body.port #done .big{font-size:8vw}body.port #done .sm{font-size:3.4vw}body.port .paper{width:34vw}
+#staff{position:fixed;right:1.2vmin;bottom:1.2vmin;z-index:6;display:flex;gap:1vmin}
+#staff button{background:rgba(237,214,194,.10);color:rgba(237,214,194,.65);border:1px solid rgba(237,214,194,.25);border-radius:1vmin;padding:1.2vmin 1.8vmin;font:600 max(13px,1.6vmin) Arial,sans-serif;cursor:pointer;touch-action:manipulation}
+#staff button.arm{background:#C8102E;color:#fff;border-color:#C8102E}
 #receipt{display:none}
-#exit{position:fixed;right:1.5vmin;top:50%;transform:translateY(-50%);z-index:5;background:rgba(237,214,194,.12);color:rgba(237,214,194,.6);border:1px solid rgba(237,214,194,.25);border-radius:1vmin;padding:1.2vmin 1.6vmin;font:600 1.6vmin Arial,sans-serif;cursor:pointer}
-#exitmsg{position:fixed;right:1.5vmin;top:calc(50% + 4vmin);z-index:5;display:none;background:#fff;color:#4A141C;border-radius:1vmin;padding:1vmin 1.4vmin;font-size:1.8vmin}
+#exitmsg{position:fixed;right:1.2vmin;bottom:7vmin;z-index:5;display:none;background:#fff;color:#4A141C;border-radius:1vmin;padding:1vmin 1.4vmin;font-size:1.8vmin}
 @media print{
   @page{margin:0}
   html,body{background:#fff!important;color:#000!important;height:auto;overflow:visible}
@@ -59,9 +73,9 @@ h1{font:600 7vmin/1.05 Georgia,serif;margin:1.5vmin 0 0;text-align:center}
     <div class="tile"><div class="k">Temperature</div><div class="v" id="vT">–</div><span class="b" id="bT">…</span></div>
   </div>
   <button id="buzz" aria-label="Print my receipt">Press for<br>your receipt</button>
-  <div><div class="hint">One press · your receipt prints below</div><div class="status" id="status">Loading live readings…</div><div class="status" style="margin-top:.6vmin">Event experience designed by LifeAtBridge Events (@lifeatbridge) · v4</div></div>
+  <div><div class="hint">One press · your receipt prints below</div><div class="status" id="status">Loading live readings…</div><div class="status" style="margin-top:.6vmin">Event experience designed by LifeAtBridge Events (@lifeatbridge) · v5</div></div>
 </div>
-<button id="exit" title="Hold for 2 seconds to exit">Exit</button><div id="exitmsg">Kiosk mode: press <b>Alt + F4</b> to close</div>
+<div id="staff"><button id="lay">Layout: Auto</button><button id="exit">Exit</button></div><div id="exitmsg">Kiosk mode: press <b>Alt + F4</b> to close</div>
 <div id="done"><div class="big">Printing your receipt…</div><div class="sm">Take it to the goodie bag counter for your passport stamp</div><div class="paper"></div></div>
 
 <div id="receipt">
@@ -198,10 +212,22 @@ var bz=document.getElementById('buzz');
 bz.addEventListener('click',press);
 document.addEventListener('keydown',function(e){if(e.key===' '||e.key==='Enter'){e.preventDefault();press();}});
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
-var ex=document.getElementById('exit'),hold=null;
-function exitNow(){if(HELPER){try{fetch('/exit',{method:'POST'});}catch(e){}}try{window.close();}catch(e){} setTimeout(function(){var m=document.getElementById('exitmsg');m.style.display='block';setTimeout(function(){m.style.display='none';},5000);},300);}
-ex.addEventListener('pointerdown',function(){hold=setTimeout(exitNow,2000);});
-['pointerup','pointerleave','pointercancel'].forEach(function(t){ex.addEventListener(t,function(){clearTimeout(hold);});});
+// layout: Auto follows the screen; staff can force Portrait or Landscape (remembered on this laptop)
+var LAY='kye_layout', lb=document.getElementById('lay');
+function applyLayout(){var m=ls(LAY)||'auto';var port=m==='portrait'||(m==='auto'&&innerHeight>innerWidth);document.body.classList.toggle('port',port);lb.textContent='Layout: '+(m==='auto'?'Auto':m==='portrait'?'Portrait':'Landscape');}
+lb.addEventListener('click',function(){var m=ls(LAY)||'auto';ls(LAY,m==='auto'?'portrait':m==='portrait'?'landscape':'auto');applyLayout();});
+addEventListener('resize',applyLayout); applyLayout();
+// exit: tap Exit, then tap "Tap again to close" within 4 s (two taps so guests can't close it by accident)
+var ex=document.getElementById('exit'),armT=null;
+function exitNow(){
+  if(HELPER){fetch('/exit',{method:'POST',keepalive:true}).catch(function(){});}
+  try{window.close();}catch(e){}
+  setTimeout(function(){var m=document.getElementById('exitmsg');m.style.display='block';setTimeout(function(){m.style.display='none';},6000);},800);
+}
+ex.addEventListener('click',function(){
+  if(ex.classList.contains('arm')){clearTimeout(armT);ex.classList.remove('arm');ex.textContent='Closing…';exitNow();setTimeout(function(){ex.textContent='Exit';},3000);return;}
+  ex.classList.add('arm');ex.textContent='Tap again to close';armT=setTimeout(function(){ex.classList.remove('arm');ex.textContent='Exit';},4000);
+});
 load(); setInterval(load,REFRESH_MS);
 // if the saved reading is very old and we're offline, keep it but say so on screen
 setInterval(function(){if(R&&!R.live&&Date.now()-R.at>FRESH_MS)set('status','Saved reading from '+fmtDate(R.at)+' '+fmtTime(R.at)+' · reconnecting…');},60000);
