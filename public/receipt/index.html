@@ -30,14 +30,16 @@ h1{font:600 7vmin/1.05 Georgia,serif;margin:1.5vmin 0 0;text-align:center}
 @keyframes feed{to{height:26vmin}}
 @media (orientation:portrait){.tiles{grid-template-columns:repeat(2,1fr)}#buzz{width:44vmin;height:44vmin}h1{font-size:8vmin}}
 #receipt{display:none}
+#exit{position:fixed;right:1.5vmin;top:50%;transform:translateY(-50%);z-index:5;background:rgba(237,214,194,.12);color:rgba(237,214,194,.6);border:1px solid rgba(237,214,194,.25);border-radius:1vmin;padding:1.2vmin 1.6vmin;font:600 1.6vmin Arial,sans-serif;cursor:pointer}
+#exitmsg{position:fixed;right:1.5vmin;top:calc(50% + 4vmin);z-index:5;display:none;background:#fff;color:#4A141C;border-radius:1vmin;padding:1vmin 1.4vmin;font-size:1.8vmin}
 @media print{
   @page{margin:0}
   html,body{background:#fff!important;color:#000!important;height:auto;overflow:visible}
   #screen,#done{display:none!important}
-  #receipt{display:block;width:64mm;margin:0;padding:1mm 1mm 6mm 0;color:#000;font-family:Arial,Helvetica,sans-serif;font-size:9pt;line-height:1.3}
+  #receipt{display:block;width:58mm;margin:0;padding:1mm 0 6mm 0;color:#000;font-family:Arial,Helvetica,sans-serif;font-size:9pt;line-height:1.3}
   #receipt *{color:#000!important}
 }
-#receipt .c{text-align:center}#receipt img{width:42mm;display:block;margin:0 auto 1mm}
+#receipt .c{text-align:center}#receipt img{width:38mm;display:block;margin:0 auto 1mm}
 #receipt .t{font-size:15pt;font-weight:700;letter-spacing:.5pt;margin:1mm 0 .5mm}
 #receipt .m{font-size:8pt}
 #receipt .rule{border-top:1px dashed #000;margin:2.2mm 0}
@@ -57,8 +59,9 @@ h1{font:600 7vmin/1.05 Georgia,serif;margin:1.5vmin 0 0;text-align:center}
     <div class="tile"><div class="k">Temperature</div><div class="v" id="vT">–</div><span class="b" id="bT">…</span></div>
   </div>
   <button id="buzz" aria-label="Print my receipt">Press for<br>your receipt</button>
-  <div><div class="hint">One press · your receipt prints below</div><div class="status" id="status">Loading live readings…</div></div>
+  <div><div class="hint">One press · your receipt prints below</div><div class="status" id="status">Loading live readings…</div><div class="status" style="margin-top:.6vmin">Event experience designed by LifeAtBridge Events (@lifeatbridge) · v3</div></div>
 </div>
+<button id="exit" title="Hold for 2 seconds to exit">Exit</button><div id="exitmsg">Kiosk mode: press <b>Alt + F4</b> to close</div>
 <div id="done"><div class="big">Printing your receipt…</div><div class="sm">Take it to the goodie bag counter for your passport stamp</div><div class="paper"></div></div>
 
 <div id="receipt">
@@ -77,6 +80,7 @@ h1{font:600 7vmin/1.05 Georgia,serif;margin:1.5vmin 0 0;text-align:center}
   <div class="rule"></div>
   <div class="c m">Show this at the goodie bag counter<br>for your passport stamp.</div>
   <div class="c m" style="margin-top:2mm">CHOSEN by Dermatology</div>
+  <div class="c m" style="margin-top:2mm;font-size:7pt">Event experience designed by<br>LifeAtBridge Events (@lifeatbridge)</div>
   <div class="c m" id="rSrc" style="margin-top:2mm;font-size:6.5pt"></div>
 </div>
 
@@ -151,6 +155,10 @@ var bz=document.getElementById('buzz');
 bz.addEventListener('click',press);
 document.addEventListener('keydown',function(e){if(e.key===' '||e.key==='Enter'){e.preventDefault();press();}});
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
+var ex=document.getElementById('exit'),hold=null;
+function exitNow(){try{window.close();}catch(e){} setTimeout(function(){var m=document.getElementById('exitmsg');m.style.display='block';setTimeout(function(){m.style.display='none';},5000);},300);}
+ex.addEventListener('pointerdown',function(){hold=setTimeout(exitNow,2000);});
+['pointerup','pointerleave','pointercancel'].forEach(function(t){ex.addEventListener(t,function(){clearTimeout(hold);});});
 load(); setInterval(load,REFRESH_MS);
 // if the saved reading is very old and we're offline, keep it but say so on screen
 setInterval(function(){if(R&&!R.live&&Date.now()-R.at>FRESH_MS)set('status','Saved reading from '+fmtDate(R.at)+' '+fmtTime(R.at)+' · reconnecting…');},60000);
