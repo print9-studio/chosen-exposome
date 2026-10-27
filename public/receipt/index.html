@@ -59,7 +59,7 @@ h1{font:600 7vmin/1.05 Georgia,serif;margin:1.5vmin 0 0;text-align:center}
     <div class="tile"><div class="k">Temperature</div><div class="v" id="vT">–</div><span class="b" id="bT">…</span></div>
   </div>
   <button id="buzz" aria-label="Print my receipt">Press for<br>your receipt</button>
-  <div><div class="hint">One press · your receipt prints below</div><div class="status" id="status">Loading live readings…</div><div class="status" style="margin-top:.6vmin">Event experience designed by LifeAtBridge Events (@lifeatbridge) · v3</div></div>
+  <div><div class="hint">One press · your receipt prints below</div><div class="status" id="status">Loading live readings…</div><div class="status" style="margin-top:.6vmin">Event experience designed by LifeAtBridge Events (@lifeatbridge) · v4</div></div>
 </div>
 <button id="exit" title="Hold for 2 seconds to exit">Exit</button><div id="exitmsg">Kiosk mode: press <b>Alt + F4</b> to close</div>
 <div id="done"><div class="big">Printing your receipt…</div><div class="sm">Take it to the goodie bag counter for your passport stamp</div><div class="paper"></div></div>
@@ -142,13 +142,56 @@ function buildReceipt(){
   set('rTotNote',raised>=2?'A busy day for your skin. The exposome is real, and it adds up.':'An easier day for your skin. The exposome still adds up over time.');
   set('rSrc','Reading '+fmtTime(R.at)+' · Open-Meteo (weather, air quality) · UV: WHO scale · PM2.5: CPCB bands');
 }
+
+// ---------- Direct printing through the local helper (portable kiosk) ----------
+var HELPER=(location.protocol==='http:'&&(location.hostname==='localhost'||location.hostname==='127.0.0.1'));
+var DOTS=576, PAD=24; // 80 mm head = 576 dots at 203 dpi
+var logoImg=new Image(); logoImg.src=document.querySelector('#receipt img').src;
+function drawReceipt(){
+  var c=document.createElement('canvas'), x=c.getContext('2d'); c.width=DOTS; c.height=2400;
+  x.fillStyle='#fff'; x.fillRect(0,0,c.width,c.height); x.fillStyle='#000'; x.textBaseline='top';
+  var W=DOTS-2*PAD, y=8;
+  function font(px,w,it){x.font=(it?'italic ':'')+(w||400)+' '+px+'px Arial, Helvetica, sans-serif';}
+  function wrap(t,px,w,align,it,lh){font(px,w,it);var words=t.split(' '),line='',lines=[];words.forEach(function(wd){var tt=line?line+' '+wd:wd;if(x.measureText(tt).width>W&&line){lines.push(line);line=wd;}else line=tt;});if(line)lines.push(line);
+    lines.forEach(function(l){var lx=align==='c'?PAD+(W-x.measureText(l).width)/2:PAD;x.fillText(l,lx,y);y+=Math.round(px*(lh||1.3));});}
+  function rule(){y+=8;for(var i=PAD;i<DOTS-PAD;i+=12)x.fillRect(i,y,7,2);y+=12;}
+  function row(a,b){font(26,700);var bw=x.measureText(b).width,aw=x.measureText(a).width;if(aw+bw+16>W){x.fillText(a,PAD,y);y+=32;x.fillText(b,DOTS-PAD-bw,y);}else{x.fillText(a,PAD,y);x.fillText(b,DOTS-PAD-bw,y);}y+=34;}
+  if(logoImg.complete&&logoImg.naturalWidth){var lw=330,lh=lw*logoImg.naturalHeight/logoImg.naturalWidth;x.drawImage(logoImg,(DOTS-lw)/2,y,lw,lh);y+=lh+10;}
+  wrap('EXPOSOME RECEIPT',40,700,'c');
+  wrap('Know Your Exposome · Bangalore International Centre',20,400,'c');
+  wrap(document.getElementById('rWhen').textContent,20,400,'c');
+  rule(); wrap('TODAY’S EXPOSURE, BENGALURU',20,400,'l');
+  var rows=[['UV INDEX',Math.round(R.uv),uvBand(R.uv),NOTES.uv],['AIR · PM2.5',Math.round(R.pm)+' µg/m³',pmBand(R.pm),NOTES.pm],['HUMIDITY',Math.round(R.rh)+'%',rhBand(R.rh),NOTES.rh],['TEMPERATURE',Math.round(R.t)+'°C',tBand(R.t),NOTES.t]];
+  rows.forEach(function(r){y+=6;row(r[0],r[1]+' · '+r[2][0].toUpperCase());wrap(r[3][r[2][1]],22,400,'l');});
+  rule(); row('RAISED FACTORS',document.getElementById('rTot').textContent); wrap(document.getElementById('rTotNote').textContent,22,400,'l');
+  rule(); wrap('You cannot change the air.',26,400,'c',true); wrap('You can change the outcome.',26,400,'c',true);
+  rule(); wrap('Show this at the goodie bag counter for your passport stamp.',22,400,'c');
+  y+=6; wrap('CHOSEN by Dermatology',22,400,'c');
+  y+=6; wrap('Event experience designed by LifeAtBridge Events (@lifeatbridge)',18,400,'c');
+  y+=4; wrap(document.getElementById('rSrc').textContent,16,400,'c');
+  y+=10; var out=document.createElement('canvas'); out.width=DOTS; out.height=y; out.getContext('2d').drawImage(c,0,0); return out;
+}
+function escpos(cv){
+  var w=cv.width,h=cv.height,xb=w/8,d=cv.getContext('2d').getImageData(0,0,w,h).data,out=[0x1B,0x40];
+  for(var y0=0;y0<h;y0+=128){var bh=Math.min(128,h-y0);out.push(0x1D,0x76,0x30,0,xb&255,xb>>8,bh&255,bh>>8);
+    for(var yy=y0;yy<y0+bh;yy++)for(var bx=0;bx<xb;bx++){var v=0;for(var k=0;k<8;k++){var i=((yy*w)+bx*8+k)*4;var lum=d[i]*.3+d[i+1]*.59+d[i+2]*.11;if(lum<150)v|=(128>>k);}out.push(v);}}
+  out.push(0x1B,0x64,4,0x1D,0x56,0x42,0); return new Uint8Array(out);
+}
+function b64(u){var s='',CH=0x8000;for(var i=0;i<u.length;i+=CH)s+=String.fromCharCode.apply(null,u.subarray(i,i+CH));return btoa(s);}
+async function helperPrint(){
+  var bytes=escpos(drawReceipt());
+  var r=await fetch('/print',{method:'POST',headers:{'Content-Type':'text/plain'},body:b64(bytes)});
+  if(!r.ok)throw new Error(await r.text());
+}
 function press(){
   if(busy||!R)return; busy=true;
   var b=document.getElementById('buzz'); b.disabled=true;
   buildReceipt();
   document.getElementById('done').classList.add('on');
-  setTimeout(function(){window.print();},150);
+  if(HELPER){ helperPrint().catch(function(e){document.querySelector('#done .big').textContent='Printer not responding';document.querySelector('#done .sm').textContent='Please call a team member';console.error(e);}); }
+  else setTimeout(function(){window.print();},150);
   setTimeout(function(){document.getElementById('done').classList.remove('on');b.disabled=false;busy=false;
+    document.querySelector('#done .big').textContent='Printing your receipt…';document.querySelector('#done .sm').textContent='Take it to the goodie bag counter for your passport stamp';
     var p=document.querySelector('#done .paper');p.style.animation='none';void p.offsetWidth;p.style.animation='';},6000);
 }
 var bz=document.getElementById('buzz');
@@ -156,13 +199,13 @@ bz.addEventListener('click',press);
 document.addEventListener('keydown',function(e){if(e.key===' '||e.key==='Enter'){e.preventDefault();press();}});
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 var ex=document.getElementById('exit'),hold=null;
-function exitNow(){try{window.close();}catch(e){} setTimeout(function(){var m=document.getElementById('exitmsg');m.style.display='block';setTimeout(function(){m.style.display='none';},5000);},300);}
+function exitNow(){if(HELPER){try{fetch('/exit',{method:'POST'});}catch(e){}}try{window.close();}catch(e){} setTimeout(function(){var m=document.getElementById('exitmsg');m.style.display='block';setTimeout(function(){m.style.display='none';},5000);},300);}
 ex.addEventListener('pointerdown',function(){hold=setTimeout(exitNow,2000);});
 ['pointerup','pointerleave','pointercancel'].forEach(function(t){ex.addEventListener(t,function(){clearTimeout(hold);});});
 load(); setInterval(load,REFRESH_MS);
 // if the saved reading is very old and we're offline, keep it but say so on screen
 setInterval(function(){if(R&&!R.live&&Date.now()-R.at>FRESH_MS)set('status','Saved reading from '+fmtDate(R.at)+' '+fmtTime(R.at)+' · reconnecting…');},60000);
-window.__kiosk={get R(){return R;},set R(v){R=v;paint();},build:buildReceipt};
+window.__kiosk={get R(){return R;},set R(v){R=v;paint();},build:buildReceipt,draw:drawReceipt,escpos:escpos};
 })();
 </script>
 </body>
