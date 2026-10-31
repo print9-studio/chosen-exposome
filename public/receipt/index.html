@@ -7,7 +7,7 @@
 <style>
 :root{--mar:#4A141C;--red:#C8102E;--cream:#EDD6C2;--deep:#2A0C12}
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;background:var(--deep);color:var(--cream);font-family:"Helvetica Neue",Arial,sans-serif;overflow:hidden;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+html,body{margin:0;height:100%;touch-action:none;background:var(--deep);color:var(--cream);font-family:"Helvetica Neue",Arial,sans-serif;overflow:hidden;-webkit-user-select:none;user-select:none;touch-action:manipulation}
 #screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:4vmin 4vmin 3vmin;background:radial-gradient(120% 90% at 50% 100%,#5c1622 0%,var(--deep) 60%)}
 .logo{height:7vmin}
 h1{font:600 7vmin/1.05 Georgia,serif;margin:1.5vmin 0 0;text-align:center}
@@ -73,7 +73,7 @@ body.port #done .big{font-size:8vw}body.port #done .sm{font-size:3.4vw}body.port
     <div class="tile"><div class="k">Temperature</div><div class="v" id="vT">–</div><span class="b" id="bT">…</span></div>
   </div>
   <button id="buzz" aria-label="Print my receipt">Press for<br>your receipt</button>
-  <div><div class="hint">One press · your receipt prints below</div><div class="status" id="status">Loading live readings…</div><div class="status" style="margin-top:.6vmin">Event experience designed by LifeAtBridge Events (@lifeatbridge) · v5</div></div>
+  <div><div class="hint">One press · your receipt prints below</div><div class="status" id="status">Loading live readings…</div><div class="status" style="margin-top:.6vmin">Event experience designed by LifeAtBridge Events (@lifeatbridge) · v6</div></div>
 </div>
 <div id="staff"><button id="lay">Layout: Auto</button><button id="exit">Exit</button></div><div id="exitmsg">Kiosk mode: press <b>Alt + F4</b> to close</div>
 <div id="done"><div class="big">Printing your receipt…</div><div class="sm">Take it to the goodie bag counter for your passport stamp</div><div class="paper"></div></div>
@@ -209,6 +209,9 @@ function press(){
     var p=document.querySelector('#done .paper');p.style.animation='none';void p.offsetWidth;p.style.animation='';},6000);
 }
 var bz=document.getElementById('buzz');
+// Touch screens: fire on the first touch/press anywhere on the screen (not only a full click on the button)
+function anyPress(e){ if(e.target.closest&&e.target.closest('#staff'))return; if(e.cancelable)e.preventDefault(); press(); }
+['pointerdown','touchstart','mousedown'].forEach(function(t){document.getElementById('screen').addEventListener(t,anyPress,{passive:false});});
 bz.addEventListener('click',press);
 document.addEventListener('keydown',function(e){if(e.key===' '||e.key==='Enter'){e.preventDefault();press();}});
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
